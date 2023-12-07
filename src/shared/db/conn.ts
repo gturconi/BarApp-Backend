@@ -1,4 +1,4 @@
-import { createPool } from "mysql2";
+import { createPool } from "mysql2/promise";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -9,15 +9,6 @@ const pool = createPool({
   user: process.env.USER,
   password: process.env.PASSWORD,
   database: process.env.DBNAME,
-});
-
-pool.getConnection((err, connection) => {
-  if (err) {
-    console.error("Error connecting to database:", err);
-    return;
-  }
-  console.log("Connection established successfully!");
-  connection.release();
 });
 
 export default pool;
