@@ -10,6 +10,7 @@ import { ROLES } from "../../role/models";
 import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
 import { UserRole } from "../../types/userRol";
 import * as QueryConstants from "../../shared/queryConstants";
+import { handleServerError } from "../../shared/errorHandler";
 
 dotenv.config();
 const secret = process.env.SECRET || "";
@@ -17,12 +18,18 @@ const secret = process.env.SECRET || "";
 export const signupHandler = async (req: Request, res: Response) => {
   try {
     if (!req.body || !req.body.role) {
-      return res.status(400).json({ message: "No se proporcionaron roles" });
+      return handleServerError({
+        res,
+        message: "No se proporcionaron roles",
+        errorNumber: 400,
+      });
     }
 
     if (!ROLES.includes(req.body.role)) {
-      return res.status(400).json({
+      return handleServerError({
+        res,
         message: `El rol ${req.body.role} no existe`,
+        errorNumber: 400,
       });
     }
 
@@ -34,7 +41,11 @@ export const signupHandler = async (req: Request, res: Response) => {
     );
 
     if (existingUsers.length > 0) {
-      return res.status(409).json({ message: "El usuario ya existe" });
+      return handleServerError({
+        res,
+        message: "El usuario ya existe",
+        errorNumber: 409,
+      });
     }
 
     const newUser = new User(name, tel, email, password);
@@ -60,13 +71,15 @@ export const signupHandler = async (req: Request, res: Response) => {
       [newUser.name, newUser.tel, newUser.email, newUser.password, newUser.role]
     );
 
-    const token = jwt.sign({ id: savedUser.insertId }, secret, {
-      expiresIn: 86400,
-    });
+    const token = generateToken(savedUser.insertId);
 
     return res.status(200).json({ token });
   } catch (error) {
-    return res.status(500).json({ message: "Ocurrió un error" });
+    return handleServerError({
+      res,
+      message: "Ocurrio un error al registrar el usuario",
+      errorNumber: 500,
+    });
   }
 };
 
@@ -78,7 +91,11 @@ export const signinHandler = async (req: Request, res: Response) => {
     );
 
     if (rows.length === 0) {
-      return res.status(400).json({ message: "Usuario no encontrado" });
+      return handleServerError({
+        res,
+        message: "Usuario no encontrado",
+        errorNumber: 404,
+      });
     }
 
     const userFound = rows[0];
@@ -89,17 +106,27 @@ export const signinHandler = async (req: Request, res: Response) => {
     );
 
     if (!matchPassword)
-      return res.status(401).json({
-        token: null,
+      return handleServerError({
+        res,
         message: "Contraseña incorrecta",
+        errorNumber: 401,
+        token: null,
       });
 
-    const token = jwt.sign({ id: userFound.id }, secret, {
-      expiresIn: 86400,
-    });
+    const token = generateToken(userFound.id);
+
     res.json({ token });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Ocurrió un error" });
+    return handleServerError({
+      res,
+      message: "Ocurrio un error al iniciar sesión",
+      errorNumber: 500,
+    });
   }
+};
+
+const generateToken = (userId: number): string => {
+  return jwt.sign({ id: userId }, secret, {
+    expiresIn: 86400,
+  });
 };

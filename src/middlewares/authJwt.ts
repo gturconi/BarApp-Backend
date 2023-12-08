@@ -63,7 +63,6 @@ export const isAdmin = async (
       QueryConstants.SELECT_USER_BY_ID,
       [req.userId]
     );
-
     if (rows && rows[0].roleName === "admin") {
       next();
       return;
