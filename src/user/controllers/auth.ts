@@ -9,7 +9,7 @@ import { ROLES } from "../../role/models";
 
 import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
 import { UserRole } from "../../types/userRol";
-import * as QueryConstants from "../../shared/queryConstants";
+import * as QueryConstants from "./queryConstants";
 import { handleServerError } from "../../shared/errorHandler";
 
 dotenv.config();

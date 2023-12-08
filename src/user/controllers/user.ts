@@ -1,14 +1,13 @@
-import { User } from "../models/user";
-import { Role } from "../../role/models";
-import { ROLES } from "../../role/models";
 import { Request, Response } from "express";
 import bcryptjs from "bcryptjs";
 
 import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
 import pool from "../../shared/db/conn";
-import * as QueryConstants from "../../shared/queryConstants";
+import * as QueryConstants from "./queryConstants";
 import { handleServerError } from "../../shared/errorHandler";
+
 import { EntityListResponse } from "../../shared/models/entity.list.response.model";
+import { User } from "../models/user";
 
 const encrypt = async (passwordPlain: string): Promise<string> => {
   const hash = await bcryptjs.hash(passwordPlain, 10);
@@ -110,6 +109,31 @@ export const updateUser = async (req: Request, res: Response) => {
     return handleServerError({
       res,
       message: "Ocurrio un error al actualizar el usuario",
+      errorNumber: 500,
+    });
+  }
+};
+
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const [newUser] = await pool.query<DbQueryResult<User[]>>(
+      QueryConstants.SELECT_USER_BY_ID,
+      [id]
+    );
+    if (!newUser[0]) {
+      return handleServerError({
+        res,
+        message: "Usuario no encontrado",
+        errorNumber: 404,
+      });
+    }
+    await pool.query<DbQueryInsert>(QueryConstants.DELETE_USER, [id]);
+    return res.status(200).json({ message: "Usuario eliminado exitosamente" });
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: "Ocurrio un error al eliminar el usuario",
       errorNumber: 500,
     });
   }

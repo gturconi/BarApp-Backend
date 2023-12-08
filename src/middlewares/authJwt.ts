@@ -8,7 +8,7 @@ import pool from "../shared/db/conn";
 import { User } from "../user/models/user";
 import { DbQueryResult } from "../shared/queryTypes";
 import { UserRole } from "../types/userRol";
-import * as QueryConstants from "../shared/queryConstants";
+import * as QueryConstants from "../user/controllers/queryConstants";
 
 dotenv.config();
 

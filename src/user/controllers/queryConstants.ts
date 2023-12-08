@@ -1,4 +1,3 @@
-/* USER */
 export const SELECT_USER_BY_EMAIL = "SELECT * FROM users WHERE email = ?";
 
 export const SELECT_ROLE_BY_NAME = "SELECT * FROM roles WHERE name = ?";
@@ -19,3 +18,5 @@ export const SELECT_USERS =
 
 export const UPDATE_USER =
   "UPDATE users SET name = IFNULL(?, name), tel = IFNULL(?, tel), email = IFNULL(?, email), password = IFNULL(?, password) ,rol_id = IFNULL(?, rol_id) WHERE id = ?";
+
+export const DELETE_USER = "DELETE FROM users WHERE id = ?";
