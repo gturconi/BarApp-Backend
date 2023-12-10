@@ -11,4 +11,15 @@ const pool = createPool({
   database: process.env.DBNAME,
 });
 
+async function checkDatabaseConnection() {
+  try {
+    const connection = await pool.getConnection();
+    console.log('¡Conexión exitosa a la base de datos!');
+    connection.release(); 
+  } catch (error) {
+    console.error('Error al conectar con la base de datos:', error);
+  }
+}
+
+checkDatabaseConnection();
 export default pool;
