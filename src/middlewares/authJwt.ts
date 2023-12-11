@@ -32,7 +32,6 @@ export async function verifyToken(
     return res.status(403).json({ message: "No se recibió ningún token" });
   try {
     const decoded = jwt.verify(token, secret);
-
     if (typeof decoded === "object" && "id" in decoded) {
       req.userId = decoded.id;
     }
@@ -71,7 +70,6 @@ export const isAdmin = async (
       .status(403)
       .json({ message: "Requiere permisos de administrador!" });
   } catch (error) {
-    console.log(error);
     return res.status(500).send({ message: "Ocurrió un error" });
   }
 };
