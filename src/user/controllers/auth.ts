@@ -127,6 +127,6 @@ export const signinHandler = async (req: Request, res: Response) => {
 
 const generateToken = (userId: number): string => {
   return jwt.sign({ id: userId }, secret, {
-    expiresIn: 86400,
+    expiresIn: 3600,
   });
 };
