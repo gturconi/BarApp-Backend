@@ -22,7 +22,9 @@ const validatorProductType: ((
         .min(1);
 
       const schema = z.object({
-        description: isPutRequest ? descriptionValidation.optional() : descriptionValidation
+        description: isPutRequest
+          ? descriptionValidation.optional()
+          : descriptionValidation,
       });
 
       const validatedData = schema.safeParse(req.body);

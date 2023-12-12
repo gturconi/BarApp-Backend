@@ -5,18 +5,26 @@ import {
   getProductType,
   updateProductType,
   deleteProductType,
-  insertProductType
+  insertProductType,
 } from "../product-type/controllers/productType";
 
-//import validatorUser from "../user/validators/user";
-//import { isAdmin, verifyToken } from "../middlewares/authJwt";
+import validatorProductType from "../product-type/validators/productsType";
+
 
 const router = express.Router();
 
-router.get("/", /*verifyToken,*/ getProductsType);
-router.get("/:id", /*verifyToken,*/ getProductType);
-router.put("/:id", /*[verifyToken, isAdmin], validatorUser,*/ updateProductType);
-router.delete("/:id", /*[verifyToken, isAdmin],*/ deleteProductType);
-router.post("/", /*[verifyToken, isAdmin],*/ insertProductType);
+router.get("/",  getProductsType);
+router.get("/:id",  getProductType);
+router.put(
+  "/:id",
+  validatorProductType,
+  updateProductType
+);
+router.delete("/:id", deleteProductType);
+router.post(
+  "/",
+  validatorProductType,
+  insertProductType
+);
 
 export default router;
