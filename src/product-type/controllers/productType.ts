@@ -70,6 +70,13 @@ export const getProductsType = async (req: Request, res: Response) => {
 export const insertProductType = async (req: Request, res: Response) => {
   try {
     const { description } = req.body;
+    const image = req.file;
+
+    if (!image) {
+      return res
+        .status(400)
+        .json({ message: "No se ha adjuntado ningún archivo de imagen" });
+    }
 
     const [existingProduct] = await pool.query<DbQueryResult<ProductType[]>>(
       QueryConstants.SELECT_PRODUCT_TYPE_BY_DESCRIPTION,
@@ -80,11 +87,11 @@ export const insertProductType = async (req: Request, res: Response) => {
       return res.status(409).json({ message: "El tipo de producto ya existe" });
     }
 
-    const newProductType = new ProductType(description);
+    const newProductType = new ProductType(description, image.buffer);
 
     const savedProductType = await pool.query<DbQueryInsert>(
       QueryConstants.INSERT_PRODUCT_TYPE,
-      [newProductType.description]
+      [newProductType.description, newProductType.image]
     );
 
     if (savedProductType[0].affectedRows <= 0) {
@@ -103,10 +110,11 @@ export const updateProductType = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updateData = { ...req.body };
+    const newImage = req.file;
 
     const updateProductType = await pool.query<DbQueryInsert>(
       QueryConstants.UPDATE_PRODUCT_TYPE,
-      [updateData.description, id]
+      [updateData.description, newImage ? newImage.buffer : null, newImage ? newImage.buffer : null, id]
     );
 
     if (updateProductType[0].affectedRows <= 0) {
