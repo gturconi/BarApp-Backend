@@ -1,6 +1,12 @@
 import { Router } from "express";
-import { signinHandler, signupHandler } from "../user/controllers/auth";
+import {
+  recoverPasswordHandler,
+  resetPassword,
+  signinHandler,
+  signupHandler,
+} from "../user/controllers/auth";
 import validatorUser from "../user/validators/user";
+import { verifyToken } from "../middlewares/authJwt";
 
 const router = Router();
 
@@ -15,5 +21,9 @@ router.use((req, res, next) => {
 router.post("/signup", validatorUser, signupHandler);
 
 router.post("/signin", validatorUser, signinHandler);
+
+router.post("/forgot", recoverPasswordHandler);
+
+router.put("/reset", verifyToken, validatorUser, resetPassword);
 
 export default router;
