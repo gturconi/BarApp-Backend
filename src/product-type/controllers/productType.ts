@@ -70,18 +70,11 @@ export const getProductsType = async (req: Request, res: Response) => {
 
 export const insertProductType = async (req: Request, res: Response) => {
   try {
+    let resizedImage: Buffer = Buffer.from([]);
     const { description } = req.body;
     const image = req.file;
 
-    if (!image) {
-      return res
-        .status(400)
-        .json({ message: "No se ha adjuntado ningún archivo de imagen" });
-    }
-
-    const resizedImage = await sharp(image.buffer)
-    .resize(400)
-    .toBuffer();
+    if (image) resizedImage = await sharp(image.buffer).resize(400).toBuffer();
 
     const [existingProduct] = await pool.query<DbQueryResult<ProductType[]>>(
       QueryConstants.SELECT_PRODUCT_TYPE_BY_DESCRIPTION,
@@ -122,19 +115,14 @@ export const insertProductType = async (req: Request, res: Response) => {
 
 export const updateProductType = async (req: Request, res: Response) => {
   try {
+    let resizedImage: Buffer = Buffer.from([]);
+
     const { id } = req.params;
     const updateData = { ...req.body };
     const newImage = req.file;
 
-    if (!newImage) {
-      return res
-        .status(400)
-        .json({ message: "No se ha adjuntado ningún archivo de imagen" });
-    }
-
-    const resizedImage = await sharp(newImage.buffer)
-    .resize(400)
-    .toBuffer();
+    if (newImage)
+      resizedImage = await sharp(newImage.buffer).resize(400).toBuffer();
 
     const updateProductType = await pool.query<DbQueryInsert>(
       QueryConstants.UPDATE_PRODUCT_TYPE,
