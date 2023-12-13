@@ -72,7 +72,7 @@ const validatorUser: ((
         name: optional ? nameValidation.optional() : nameValidation,
         email: isPutRequest ? emailValidation.optional() : emailValidation,
         password: isPutRequest ? passValidation.optional() : passValidation,
-        role: optional ? roleValidation.optional() : roleValidation,
+        role: roleValidation.optional(),
         tel: optional ? telValidation.optional() : telValidation,
       });
 
