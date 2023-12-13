@@ -8,7 +8,7 @@ export const SELECT_PRODUCTS_TYPE =
   "SELECT idProductType, description, image FROM productsType WHERE description LIKE CONCAT('%', ?, '%') LIMIT ?, ?";
 
 export const UPDATE_PRODUCT_TYPE =
-  "UPDATE productsType SET description = IFNULL(?, description), image = IF(?, ?, image) WHERE idProductType = ?";
+  "UPDATE productsType SET description = IFNULL(?, description), image = IFNULL(?, image) WHERE idProductType = ?";
 
 export const DELETE_PRODUCT_TYPE =
   "DELETE FROM productsType WHERE idProductType = ?";
