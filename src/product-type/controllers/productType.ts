@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import sharp from "sharp";
 
 import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
 import pool from "../../shared/db/conn";
@@ -78,6 +79,10 @@ export const insertProductType = async (req: Request, res: Response) => {
         .json({ message: "No se ha adjuntado ningún archivo de imagen" });
     }
 
+    const resizedImage = await sharp(image.buffer)
+    .resize(400)
+    .toBuffer();
+
     const [existingProduct] = await pool.query<DbQueryResult<ProductType[]>>(
       QueryConstants.SELECT_PRODUCT_TYPE_BY_DESCRIPTION,
       [description]
@@ -87,7 +92,7 @@ export const insertProductType = async (req: Request, res: Response) => {
       return res.status(409).json({ message: "El tipo de producto ya existe" });
     }
 
-    const newProductType = new ProductType(description, image.buffer);
+    const newProductType = new ProductType(description, resizedImage);
 
     const savedProductType = await pool.query<DbQueryInsert>(
       QueryConstants.INSERT_PRODUCT_TYPE,
@@ -112,9 +117,19 @@ export const updateProductType = async (req: Request, res: Response) => {
     const updateData = { ...req.body };
     const newImage = req.file;
 
+    if (!newImage) {
+      return res
+        .status(400)
+        .json({ message: "No se ha adjuntado ningún archivo de imagen" });
+    }
+
+    const resizedImage = await sharp(newImage.buffer)
+    .resize(400)
+    .toBuffer();
+
     const updateProductType = await pool.query<DbQueryInsert>(
       QueryConstants.UPDATE_PRODUCT_TYPE,
-      [updateData.description, newImage ? newImage.buffer : null, id]
+      [updateData.description, resizedImage ? resizedImage : null, id]
     );
 
     if (updateProductType[0].affectedRows <= 0) {
