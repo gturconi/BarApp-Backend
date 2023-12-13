@@ -102,6 +102,15 @@ export const insertProductType = async (req: Request, res: Response) => {
     if (savedProductType[0].affectedRows <= 0) {
       return res.status(200).json(savedProductType);
     }
+
+    const insertedProductId = savedProductType[0].insertId;
+
+    const [newProduct] = await pool.query<DbQueryResult<ProductType[]>>(
+      QueryConstants.SELECT_PRODUCT_TYPE_BY_ID,
+      [insertedProductId]
+    );
+
+    res.send({ productType: newProduct[0] });
   } catch (error) {
     return handleServerError({
       res,
