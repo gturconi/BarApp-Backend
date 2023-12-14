@@ -16,8 +16,8 @@ const upload = multer();
 
 const router = express.Router();
 
-router.get("/", verifyToken, getProductsType);
-router.get("/:id", verifyToken, getProductType);
+router.get("/", getProductsType);
+router.get("/:id", getProductType);
 router.post(
   "/",
   [verifyToken, isAdmin],
