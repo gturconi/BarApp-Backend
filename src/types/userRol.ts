@@ -1,3 +1,5 @@
+type UserEstate = 0 | 1;
+
 export type UserRole = {
   id: number;
   name: string;
@@ -6,4 +8,5 @@ export type UserRole = {
   password: string;
   roleId: number;
   roleName: string;
+  baja: UserEstate;
 };

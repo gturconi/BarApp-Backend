@@ -89,6 +89,7 @@ export const updateUser = async (req: Request, res: Response) => {
         updateData.email,
         updateData.password,
         updateData.rol_id,
+        updateData.baja,
         id,
       ]
     );

@@ -14,6 +14,7 @@ const validatorUser: ((
         password: req.body.password,
         role: req.body.role,
         tel: req.body.tel,
+        baja: req.body.baja,
       };
 
       const isPutRequest = req.method === "PUT";
@@ -68,12 +69,21 @@ const validatorUser: ((
         })
         .min(1, { message: "El campo rol no puede estar vacío" });
 
+      const baja = z
+        .number({
+          invalid_type_error: "El campo baja debe ser un número",
+        })
+        .refine((value) => value === 0 || value === 1, {
+          message: "El campo baja debe ser 0 o 1",
+        });
+
       const schema = z.object({
         name: optional ? nameValidation.optional() : nameValidation,
         email: isPutRequest ? emailValidation.optional() : emailValidation,
         password: isPutRequest ? passValidation.optional() : passValidation,
         role: roleValidation.optional(),
         tel: optional ? telValidation.optional() : telValidation,
+        baja: baja.optional(),
       });
 
       const validatedData = schema.safeParse(req.body);
