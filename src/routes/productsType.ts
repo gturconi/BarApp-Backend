@@ -10,15 +10,28 @@ import {
 } from "../product-type/controllers/productType";
 
 import validatorProductType from "../product-type/validators/productsType";
+import { isAdmin, verifyToken } from "../middlewares/authJwt";
 
 const upload = multer();
 
 const router = express.Router();
 
-router.get("/", getProductsType);
-router.get("/:id", getProductType);
-router.put("/:id",upload.single("image"), validatorProductType, updateProductType);
-router.delete("/:id", deleteProductType);
-router.post("/", upload.single("image"),validatorProductType, insertProductType);
+router.get("/", verifyToken, getProductsType);
+router.get("/:id", verifyToken, getProductType);
+router.post(
+  "/",
+  [verifyToken, isAdmin],
+  upload.single("image"),
+  validatorProductType,
+  insertProductType
+);
+router.put(
+  "/:id",
+  [verifyToken, isAdmin],
+  upload.single("image"),
+  validatorProductType,
+  updateProductType
+);
+router.delete("/:id", [verifyToken, isAdmin], deleteProductType);
 
 export default router;
