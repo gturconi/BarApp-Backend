@@ -46,6 +46,9 @@ export async function verifyToken(
         .status(404)
         .json({ message: "No se pudo encontrar el usuario" });
 
+    if (user[0].baja)
+      return res.status(401).json({ message: "No autorizado!" });
+
     next();
   } catch (error) {
     return res.status(401).json({ message: "No autorizado!" });

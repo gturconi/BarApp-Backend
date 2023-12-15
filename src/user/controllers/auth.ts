@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { Request, Response } from "express";
 import pool from "../../shared/db/conn";
-import nodemailer, { Transporter } from "nodemailer";
+import nodemailer from "nodemailer";
 import bcryptjs from "bcryptjs";
 
 import { User } from "../models/user";
@@ -60,7 +60,7 @@ export const signupHandler = async (req: Request, res: Response) => {
       });
     }
 
-    const newUser = new User(name, tel, email, password);
+    const newUser = new User(name, tel, email, password, 0);
 
     if (role) {
       const [rows] = await pool.query<DbQueryResult<Role[]>>(
@@ -80,7 +80,14 @@ export const signupHandler = async (req: Request, res: Response) => {
 
     const [savedUser] = await pool.query<DbQueryInsert>(
       QueryConstants.INSERT_USER,
-      [newUser.name, newUser.tel, newUser.email, newUser.password, newUser.role]
+      [
+        newUser.name,
+        newUser.tel,
+        newUser.email,
+        newUser.password,
+        newUser.role,
+        newUser.baja,
+      ]
     );
 
     const token = generateToken(savedUser.insertId);
@@ -111,6 +118,14 @@ export const signinHandler = async (req: Request, res: Response) => {
     }
 
     const userFound = rows[0];
+
+    if (userFound.baja) {
+      return handleServerError({
+        res,
+        message: "El usuario no se encuentra habilitado",
+        errorNumber: 404,
+      });
+    }
 
     const matchPassword = await User.comparePasswords(
       req.body.password,
