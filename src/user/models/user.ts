@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 
-type UserEstate = 0 | 1;
+type UserState = 0 | 1;
 
 export class User {
   public id?: number;
@@ -9,14 +9,14 @@ export class User {
   public email: string;
   public password: string;
   public role: number;
-  public baja: UserEstate;
+  public baja: UserState;
 
   constructor(
     name: string,
     tel: string,
     email: string,
     password: string,
-    baja?: UserEstate,
+    baja?: UserState,
     id?: number,
     role?: number
   ) {
