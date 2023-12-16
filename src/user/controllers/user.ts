@@ -114,7 +114,7 @@ export const updateUser = async (req: Request, res: Response) => {
 
     newUser[0].password = "";
 
-    res.send({ user: newUser[0] });
+    res.send(newUser[0]);
   } catch (error) {
     return handleServerError({
       res,

@@ -140,7 +140,7 @@ export const updateProductType = async (req: Request, res: Response) => {
       [id]
     );
 
-    res.send({ productType: newProductType[0] });
+    res.send(newProductType[0]);
   } catch (error) {
     return handleServerError({
       res,
