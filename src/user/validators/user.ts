@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
+import { MAX_FILE_SIZE } from "../../shared/constants";
 
 const validatorUser: ((
   req: Request,
@@ -15,6 +16,7 @@ const validatorUser: ((
         role: req.body.role,
         tel: req.body.tel,
         baja: req.body.baja,
+        avatar: req.file,
       };
 
       const isPutRequest = req.method === "PUT";
@@ -76,6 +78,21 @@ const validatorUser: ((
         .refine((value) => value === 0 || value === 1, {
           message: "El campo baja debe ser 0 o 1",
         });
+      const avatarValidation = z.object({
+        originalname: z
+          .string({
+            invalid_type_error: "Formato invalido",
+          })
+          .regex(/.(png|jpg|jpeg)$/i, {
+            message: "La imagen debe ser de formato PNG o JPG",
+          }),
+        buffer: z
+          .instanceof(Buffer)
+          .refine(
+            (buffer) => buffer?.length <= MAX_FILE_SIZE,
+            "El tamaño máximo permitido es 5MB"
+          ),
+      });
 
       const schema = z.object({
         name: optional ? nameValidation.optional() : nameValidation,
@@ -84,6 +101,7 @@ const validatorUser: ((
         role: roleValidation.optional(),
         tel: optional ? telValidation.optional() : telValidation,
         baja: baja.optional(),
+        avatar: avatarValidation.optional(),
       });
 
       const validatedData = schema.safeParse(req.body);

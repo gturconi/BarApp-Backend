@@ -10,6 +10,7 @@ export class User {
   public password: string;
   public role: number;
   public baja: UserState;
+  public avatar?: Buffer;
 
   constructor(
     name: string,
@@ -18,7 +19,8 @@ export class User {
     password: string,
     baja?: UserState,
     id?: number,
-    role?: number
+    role?: number,
+    avatar?: Buffer
   ) {
     this.id = id || 0;
     this.name = name;
@@ -27,6 +29,7 @@ export class User {
     this.password = password;
     this.role = role || 0;
     this.baja = baja || 0;
+    this.avatar = avatar;
   }
 
   static comparePasswords = async (

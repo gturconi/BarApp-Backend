@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
-
-const MAX_FILE_SIZE = 4000000;
+import { MAX_FILE_SIZE } from "../../shared/constants";
 
 const validatorProductType: ((
   req: Request,

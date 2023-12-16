@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import bcryptjs from "bcryptjs";
+import sharp from "sharp";
 
 import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
 import pool from "../../shared/db/conn";
@@ -74,8 +75,15 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   try {
+    let resizedAvatar = null;
     const { id } = req.params;
     const updateData = { ...req.body };
+    const newAvatar = req.file;
+
+    if (newAvatar) {
+      resizedAvatar = Buffer.from([]);
+      resizedAvatar = await sharp(newAvatar.buffer).resize(400).toBuffer();
+    }
 
     if (updateData.password) {
       updateData.password = await encrypt(updateData.password);
@@ -90,6 +98,7 @@ export const updateUser = async (req: Request, res: Response) => {
         updateData.password,
         updateData.rol_id,
         updateData.baja,
+        resizedAvatar ? resizedAvatar : null,
         id,
       ]
     );

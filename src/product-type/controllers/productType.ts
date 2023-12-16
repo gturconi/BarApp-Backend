@@ -115,14 +115,16 @@ export const insertProductType = async (req: Request, res: Response) => {
 
 export const updateProductType = async (req: Request, res: Response) => {
   try {
-    let resizedImage: Buffer = Buffer.from([]);
+    let resizedImage = null;
 
     const { id } = req.params;
     const updateData = { ...req.body };
     const newImage = req.file;
 
-    if (newImage)
+    if (newImage) {
+      resizedImage = Buffer.from([]);
       resizedImage = await sharp(newImage.buffer).resize(400).toBuffer();
+    }
 
     const updateProductType = await pool.query<DbQueryInsert>(
       QueryConstants.UPDATE_PRODUCT_TYPE,
