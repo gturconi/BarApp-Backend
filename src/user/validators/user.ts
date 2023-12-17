@@ -13,6 +13,7 @@ const validatorUser: ((
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
+        newPassword: req.body.newPassword,
         role: req.body.role,
         tel: req.body.tel,
         baja: req.body.baja,
@@ -78,26 +79,30 @@ const validatorUser: ((
         .refine((value) => value === 0 || value === 1, {
           message: "El campo baja debe ser 0 o 1",
         });
+
       const avatarValidation = z.object({
-        originalname: z
-          .string({
-            invalid_type_error: "Formato invalido",
-          })
-          .regex(/.(png|jpg|jpeg)$/i, {
-            message: "La imagen debe ser de formato PNG o JPG",
-          }),
+        originalname: z.string({
+          invalid_type_error: "Formato invalido",
+        }),
         buffer: z
           .instanceof(Buffer)
           .refine(
             (buffer) => buffer?.length <= MAX_FILE_SIZE,
             "El tamaño máximo permitido es 5MB"
-          ),
+          )
+          .refine((buffer) => {
+            const validImageFormats = ["image/jpeg", "image/png"];
+            const detectedFormat = detectImageFormat(buffer);
+
+            return validImageFormats.includes(detectedFormat!);
+          }, "El formato de la foto debe ser jpg o png"),
       });
 
       const schema = z.object({
         name: optional ? nameValidation.optional() : nameValidation,
         email: isPutRequest ? emailValidation.optional() : emailValidation,
         password: isPutRequest ? passValidation.optional() : passValidation,
+        newPassword: passValidation.optional(),
         role: roleValidation.optional(),
         tel: optional ? telValidation.optional() : telValidation,
         baja: baja.optional(),
@@ -120,3 +125,20 @@ const validatorUser: ((
 ];
 
 export default validatorUser;
+
+function detectImageFormat(buffer: Buffer | undefined): string | null {
+  if (!buffer || buffer.length < 2) {
+    return null;
+  }
+
+  const firstByte = buffer[0];
+  const secondByte = buffer[1];
+
+  if (firstByte === 0xff && secondByte === 0xd8) {
+    return "image/jpeg";
+  } else if (firstByte === 0x89 && secondByte === 0x50) {
+    return "image/png";
+  }
+
+  return null;
+}

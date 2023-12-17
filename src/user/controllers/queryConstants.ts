@@ -7,6 +7,8 @@ export const SELECT_USER_BY_ID_NO_JOIN = "SELECT * FROM users WHERE id = ?";
 export const SELECT_USER_BY_ID =
   "SELECT u.id, u.name, u.tel, u.email, r.name AS roleName, u.avatar FROM users u INNER JOIN roles AS r ON u.rol_id = r.id WHERE u.id = ?";
 
+export const GET_USER_PASSWORD = "SELECT password FROM users WHERE id = ?";
+
 export const INSERT_USER =
   "INSERT INTO users (name, tel, email, password, rol_id, baja) VALUES (?, ?, ?, ?, ?, ?)";
 

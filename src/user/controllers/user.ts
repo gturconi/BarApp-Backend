@@ -9,12 +9,6 @@ import { handleServerError } from "../../shared/errorHandler";
 
 import { EntityListResponse } from "../../shared/models/entity.list.response.model";
 import { User } from "../models/user";
-
-const encrypt = async (passwordPlain: string): Promise<string> => {
-  const hash = await bcryptjs.hash(passwordPlain, 10);
-  return hash;
-};
-
 export const getUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -86,7 +80,7 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 
     if (updateData.password) {
-      updateData.password = await encrypt(updateData.password);
+      updateData.password = await User.encryptPassword(updateData.password);
     }
 
     const updateUser = await pool.query<DbQueryInsert>(
@@ -119,6 +113,54 @@ export const updateUser = async (req: Request, res: Response) => {
     return handleServerError({
       res,
       message: "Ocurrio un error al actualizar el usuario",
+      errorNumber: 500,
+    });
+  }
+};
+
+export const changePasswords = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { password, newPassword } = req.body;
+    const newHash = await User.encryptPassword(newPassword);
+
+    const [user] = await pool.query<DbQueryResult<User[]>>(
+      QueryConstants.GET_USER_PASSWORD,
+      [id]
+    );
+
+    if (!user[0]) {
+      return handleServerError({
+        res,
+        message: "Usuario no encontrado",
+        errorNumber: 404,
+      });
+    }
+
+    if (!User.comparePasswords(password, user[0].password)) {
+      return handleServerError({
+        res,
+        message: "Contraseña incorrecta",
+        errorNumber: 401,
+      });
+    }
+
+    await pool.query<DbQueryInsert>(QueryConstants.UPDATE_USER, [
+      null,
+      null,
+      null,
+      newHash,
+      null,
+      null,
+      null,
+      id,
+    ]);
+
+    return res.status(200).json({ message: "Contraseña actualizada" });
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: "Ocurrio un error al cambiar la contraseña",
       errorNumber: 500,
     });
   }

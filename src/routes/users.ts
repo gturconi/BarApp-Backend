@@ -6,6 +6,7 @@ import {
   getUser,
   updateUser,
   deleteUser,
+  changePasswords,
 } from "../user/controllers/user";
 import validatorUser from "../user/validators/user";
 import { isAdmin, verifyToken } from "../middlewares/authJwt";
@@ -21,6 +22,12 @@ router.put(
   upload.single("avatar"),
   validatorUser,
   updateUser
+);
+router.put(
+  "/change-password/:id",
+  [verifyToken],
+  validatorUser,
+  changePasswords
 );
 router.delete("/:id", [verifyToken, isAdmin], deleteUser);
 
