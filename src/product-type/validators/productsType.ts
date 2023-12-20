@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
 import { MAX_FILE_SIZE } from "../../shared/constants";
+import { detectImageFormat } from "../../shared/utils/detectImageFormat";
 
 const validatorProductType: ((
   req: Request,
@@ -30,19 +31,21 @@ const validatorProductType: ((
         });
 
       const imageValidation = z.object({
-        originalname: z
-          .string({
-            required_error: "El campo imagen no puede estar vacío",
-          })
-          .regex(/.(png|jpg|jpeg)$/i, {
-            message: "La imagen debe ser de formato PNG o JPG",
-          }),
+        originalname: z.string({
+          invalid_type_error: "Formato invalido",
+        }),
         buffer: z
           .instanceof(Buffer)
           .refine(
             (buffer) => buffer?.length <= MAX_FILE_SIZE,
             "El tamaño máximo permitido es 5MB"
-          ),
+          )
+          .refine((buffer) => {
+            const validImageFormats = ["image/jpeg", "image/png"];
+            const detectedFormat = detectImageFormat(buffer);
+
+            return validImageFormats.includes(detectedFormat!);
+          }, "El formato de la foto debe ser jpg o png"),
       });
 
       const schema = z.object({
