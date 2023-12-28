@@ -5,8 +5,9 @@ import {
   signinHandler,
   signupHandler,
 } from "../user/controllers/auth";
+import { updateUser } from "../user/controllers/user";
 import validatorUser from "../user/validators/user";
-import { verifyToken } from "../middlewares/authJwt";
+import { verifyToken, validateIdentity } from "../middlewares/authJwt";
 
 const router = Router();
 
@@ -25,5 +26,12 @@ router.post("/signin", validatorUser, signinHandler);
 router.post("/forgot", recoverPasswordHandler);
 
 router.put("/reset", verifyToken, validatorUser, resetPassword);
+
+router.put(
+  "/edit/:id",
+  [verifyToken, validateIdentity],
+  validatorUser,
+  updateUser
+);
 
 export default router;

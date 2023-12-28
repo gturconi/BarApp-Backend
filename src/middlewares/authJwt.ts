@@ -55,6 +55,27 @@ export async function verifyToken(
   }
 }
 
+export const validateIdentity = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  let token = req.headers["x-access-token"] as string;
+  const secret = process.env.SECRET || "";
+  const { id } = req.params;
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    if (typeof decoded === "object" && "id" in decoded) {
+      id == decoded.id
+        ? next()
+        : res.status(401).send({ message: "No autorizado" });
+    }
+  } catch (error) {
+    return res.status(500).send({ message: "Ocurrió un error" });
+  }
+};
+
 export const isAdmin = async (
   req: Request,
   res: Response,
