@@ -1,5 +1,5 @@
 export const SELECT_PRODUCT_BY_ID =
-  "SELECT p.name, p.description, p.image, c.description, pre.price AS category FROM products AS p INNER JOIN productsType AS c ON p.idCat = c.idProductType INNER JOIN productPrice AS pre ON pre.idProd = p.id WHERE pre.valid_from = ( SELECT MAX(valid_from) FROM productPrice WHERE idProd = p.id ) AND p.id = ?";
+  "SELECT p.name, p.description, p.image, p.idCat, pre.price FROM products AS p INNER JOIN productPrice AS pre ON pre.idProd = p.id WHERE pre.valid_from = ( SELECT MAX(valid_from) FROM productPrice WHERE idProd = p.id ) AND p.id = ?";
 
 export const SELECT_PRODUCT_BY_NAME = "SELECT * FROM products WHERE name = ?";
 
@@ -14,3 +14,6 @@ export const INSERT_PRODUCT =
 
 export const INSERT_PRICE =
   "INSERT INTO productPrice (idProd, valid_from, price) VALUES (?, NOW(), ?);";
+
+export const UPDATE_PRODUCT =
+  "UPDATE products p INNER JOIN productPrice pre ON p.id = pre.idProd SET p.name = IFNULL(?, p.name), p.description = IFNULL(?, p.description), p.image = IFNULL(?, p.image), p.idCat = IFNULL(?, p.idCat), pre.price = IFNULL(?, pre.price) WHERE p.id = ?";

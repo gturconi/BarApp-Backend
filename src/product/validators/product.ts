@@ -14,8 +14,8 @@ const validatorProduct: ((
         name: req.body.name,
         description: req.body.description,
         image: req.file,
-        price: parseFloat(req.body.price),
-        idCat: parseInt(req.body.idCat),
+        price: req.body.price ? parseFloat(req.body.price) : undefined,
+        idCat: req.body.idCat ? parseInt(req.body.idCat) : undefined,
         promotions: req.body.promotions,
       };
 

@@ -140,3 +140,54 @@ export const insertProduct = async (req: Request, res: Response) => {
     if (connection) await connection.release();
   }
 };
+
+export const updateProduct = async (req: Request, res: Response) => {
+  let connection = null;
+  try {
+    let resizedImage = null;
+
+    const { id } = req.params;
+    const updateData = { ...req.body };
+    const newImage = req.file;
+
+    if (newImage) {
+      resizedImage = Buffer.from([]);
+      resizedImage = await sharp(newImage.buffer).resize(400).toBuffer();
+    }
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    const updateProduct = await connection.query<DbQueryInsert>(
+      QueryConstants.UPDATE_PRODUCT,
+      [
+        updateData.name,
+        updateData.description,
+        resizedImage,
+        updateData.idCat,
+        updateData.price,
+        id,
+      ]
+    );
+    await connection.commit();
+
+    if (updateProduct[0].affectedRows <= 0) {
+      return res.status(200).json(updateProduct);
+    }
+
+    const [newProduct] = await pool.query<DbQueryResult<Product[]>>(
+      QueryConstants.SELECT_PRODUCT_BY_ID,
+      [id]
+    );
+
+    res.send(newProduct[0]);
+  } catch (error) {
+    if (connection) await connection.rollback();
+    return handleServerError({
+      res,
+      message: "Ocurrio un error al actualizar el producto",
+      errorNumber: 500,
+    });
+  } finally {
+    if (connection) await connection.release();
+  }
+};

@@ -11,8 +11,8 @@ export class Product {
     name: string,
     description: string,
     image: Buffer,
-    price: number,
     idCat: number,
+    price: number,
     promotions?: number[],
     id?: number
   ) {
