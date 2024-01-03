@@ -130,13 +130,13 @@ export const insertProduct = async (req: Request, res: Response) => {
 
     res.send({ product: ProductInserted[0] });
   } catch (error) {
-    console.log(error);
+    if (connection) await connection.rollback();
     return handleServerError({
       res,
       message: "Ocurrio un error al insertar el producto",
       errorNumber: 500,
     });
   } finally {
-    if (connection) connection.release();
+    if (connection) await connection.release();
   }
 };
