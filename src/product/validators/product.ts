@@ -11,8 +11,12 @@ const validatorProduct: ((
   (req, res, next) => {
     try {
       req.body = {
+        name: req.body.name,
         description: req.body.description,
         image: req.file,
+        price: parseFloat(req.body.price),
+        idCat: parseInt(req.body.idCat),
+        promotions: req.body.promotions,
       };
 
       const isPutRequest = req.method === "PUT";
@@ -22,11 +26,8 @@ const validatorProduct: ((
           required_error: "El campo nombre no puede estar vacío",
           invalid_type_error: "El campo nombre debe ser una cadena de texto",
         })
-        .min(1,{
+        .min(1, {
           message: "El campo nombre debe tener al menos un caracter",
-        })
-        .regex(/^[A-Za-z\s]+$/, {
-            message: "El campo nombre debe contener solo letras",
         });
 
       const descriptionValidation = z
@@ -37,9 +38,6 @@ const validatorProduct: ((
         })
         .min(1, {
           message: "El campo descripción debe tener al menos un caracter",
-        })
-        .regex(/^[A-Za-z\s]+$/, {
-          message: "El campo descripcion debe contener solo letras",
         });
 
       const imageValidation = z.object({
@@ -60,10 +58,24 @@ const validatorProduct: ((
           }, "El formato de la foto debe ser jpg o png"),
       });
 
-      const productTypeIdValidation = z
+      const priceValidation = z
         .number({
-          invalid_type_error: "El campo tipo de producto debe ser un número",
+          invalid_type_error: "El campo precio debe ser un número",
         })
+        .min(0, {
+          message: "El campo precio debe ser mayor a 0",
+        });
+
+      const idCatValidation = z.number({
+        invalid_type_error: "El campo tipo de producto debe ser un número",
+      });
+
+      const promotionsValidation = z.array(
+        z.number({
+          invalid_type_error:
+            "El campo promociones debe ser un arreglo de números",
+        })
+      );
 
       const schema = z.object({
         name: isPutRequest ? nameValidation.optional() : nameValidation,
@@ -71,7 +83,9 @@ const validatorProduct: ((
           ? descriptionValidation.optional()
           : descriptionValidation,
         image: isPutRequest ? imageValidation.optional() : imageValidation,
-        productTypeId: isPutRequest ? productTypeIdValidation.optional() : productTypeIdValidation
+        price: isPutRequest ? priceValidation.optional() : priceValidation,
+        idCat: isPutRequest ? idCatValidation.optional() : idCatValidation,
+        promotions: promotionsValidation.optional(),
       });
 
       const validatedData = schema.safeParse(req.body);
