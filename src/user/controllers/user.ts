@@ -114,6 +114,7 @@ export const updateUser = async (req: Request, res: Response) => {
       res,
       message: "Ocurrio un error al actualizar el usuario",
       errorNumber: 500,
+      error,
     });
   }
 };

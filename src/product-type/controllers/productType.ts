@@ -146,6 +146,7 @@ export const updateProductType = async (req: Request, res: Response) => {
       res,
       message: "Ocurrio un error al actualizar el tipo de producto",
       errorNumber: 500,
+      error,
     });
   }
 };
