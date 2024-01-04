@@ -188,6 +188,7 @@ export const deleteUser = async (req: Request, res: Response) => {
       res,
       message: "Ocurrio un error al eliminar el usuario",
       errorNumber: 500,
+      error,
     });
   }
 };
