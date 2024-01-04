@@ -5,7 +5,7 @@ export const COUNT_PRODUCTS_TYPE =
   "SELECT COUNT(*) AS total FROM productsType WHERE description LIKE CONCAT('%', ?, '%');";
 
 export const SELECT_PRODUCTS_TYPE =
-  "SELECT idProductType, description, image FROM productsType WHERE description LIKE CONCAT('%', ?, '%') LIMIT ?, ?";
+  "SELECT idProductType, description, image FROM productsType WHERE description LIKE CONCAT('%', ?, '%') ORDER BY description ASC LIMIT ?, ?";
 
 export const UPDATE_PRODUCT_TYPE =
   "UPDATE productsType SET description = IFNULL(?, description), image = IFNULL(?, image) WHERE idProductType = ?";
