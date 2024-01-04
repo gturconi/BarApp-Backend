@@ -186,6 +186,50 @@ export const updateProduct = async (req: Request, res: Response) => {
       res,
       message: "Ocurrio un error al actualizar el producto",
       errorNumber: 500,
+      error,
+    });
+  } finally {
+    if (connection) await connection.release();
+  }
+};
+
+export const deleteProduct = async (req: Request, res: Response) => {
+  let connection = null;
+
+  try {
+    const { id } = req.params;
+    const [product] = await pool.query<DbQueryResult<Product[]>>(
+      QueryConstants.SELECT_PRODUCT_BY_ID,
+      [id]
+    );
+    if (!product[0]) {
+      return handleServerError({
+        res,
+        message: "Producto no encontrado",
+        errorNumber: 404,
+      });
+    }
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    await connection.query<DbQueryResult<Product[]>>(
+      QueryConstants.DELETE_PRICES,
+      [id]
+    );
+    await connection.query<DbQueryResult<Product[]>>(
+      QueryConstants.DELETE_PRODUCT,
+      [id]
+    );
+    await connection.commit();
+
+    return res.status(200).json({ message: "Producto eliminado exitosamente" });
+  } catch (error) {
+    if (connection) await connection.rollback();
+    return handleServerError({
+      res,
+      message: "Ocurrio un error al eliminar el producto",
+      errorNumber: 500,
+      error,
     });
   } finally {
     if (connection) await connection.release();

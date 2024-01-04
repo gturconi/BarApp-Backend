@@ -173,6 +173,7 @@ export const deleteProductType = async (req: Request, res: Response) => {
       res,
       message: "Ocurrio un error al eliminar el tipo de producto",
       errorNumber: 500,
+      error,
     });
   }
 };
