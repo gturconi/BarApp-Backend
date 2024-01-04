@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
-
-type UserState = 0 | 1;
+import { Baja } from "../../shared/constants";
 
 export class User {
   public id?: number;
@@ -9,7 +8,7 @@ export class User {
   public email: string;
   public password: string;
   public role: number;
-  public baja: UserState;
+  public baja: Baja;
   public avatar?: Buffer;
 
   constructor(
@@ -17,7 +16,7 @@ export class User {
     tel: string,
     email: string,
     password: string,
-    baja?: UserState,
+    baja?: Baja,
     id?: number,
     role?: number,
     avatar?: Buffer

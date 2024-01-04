@@ -1,3 +1,5 @@
+import { Baja } from "../../shared/constants";
+
 export class Product {
   public id?: number;
   public name: string;
@@ -6,6 +8,7 @@ export class Product {
   public price: number;
   public idCat: number;
   public promotions?: number[];
+  public baja: Baja;
 
   constructor(
     name: string,
@@ -14,6 +17,7 @@ export class Product {
     idCat: number,
     price: number,
     promotions?: number[],
+    baja?: Baja,
     id?: number
   ) {
     this.id = id || 0;
@@ -23,5 +27,6 @@ export class Product {
     this.price = price;
     this.idCat = idCat;
     this.promotions = promotions;
+    this.baja = baja || 0;
   }
 }
