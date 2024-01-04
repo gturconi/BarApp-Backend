@@ -17,6 +17,7 @@ const validatorProduct: ((
         price: req.body.price ? parseFloat(req.body.price) : undefined,
         idCat: req.body.idCat ? parseInt(req.body.idCat) : undefined,
         promotions: req.body.promotions,
+        baja: req.body.baja ? parseInt(req.body.baja) : undefined,
       };
 
       const isPutRequest = req.method === "PUT";
@@ -77,6 +78,14 @@ const validatorProduct: ((
         })
       );
 
+      const baja = z
+        .number({
+          invalid_type_error: "El campo baja debe ser un número",
+        })
+        .refine((value) => value === 0 || value === 1, {
+          message: "El campo baja debe ser 0 o 1",
+        });
+
       const schema = z.object({
         name: isPutRequest ? nameValidation.optional() : nameValidation,
         description: isPutRequest
@@ -86,6 +95,7 @@ const validatorProduct: ((
         price: isPutRequest ? priceValidation.optional() : priceValidation,
         idCat: isPutRequest ? idCatValidation.optional() : idCatValidation,
         promotions: promotionsValidation.optional(),
+        baja: baja.optional(),
       });
 
       const validatedData = schema.safeParse(req.body);

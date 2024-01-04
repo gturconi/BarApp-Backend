@@ -163,6 +163,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         updateData.description,
         resizedImage,
         updateData.idCat,
+        updateData.baja,
         updateData.price,
         id,
       ]
