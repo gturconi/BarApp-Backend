@@ -9,7 +9,6 @@ import { handleServerError } from "../../shared/errorHandler";
 
 import { EntityListResponse } from "../../shared/models/entity.list.response.model";
 import { Product } from "../models/product";
-import { ProductPrice } from "../models/price";
 
 export const getProducts = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
