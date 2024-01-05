@@ -1,4 +1,4 @@
-type UserState = 0 | 1;
+import { Baja } from "../shared/constants";
 
 export type UserRole = {
   id: number;
@@ -8,5 +8,5 @@ export type UserRole = {
   password: string;
   roleId: number;
   roleName: string;
-  baja: UserState;
+  baja: Baja;
 };

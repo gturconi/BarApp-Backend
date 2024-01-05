@@ -17,7 +17,7 @@ const validatorUser: ((
         newPassword: req.body.newPassword,
         role: req.body.role,
         tel: req.body.tel,
-        baja: req.body.baja,
+        baja: req.body.baja ? parseFloat(req.body.baja) : undefined,
         avatar: req.file,
       };
 
