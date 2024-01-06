@@ -7,6 +7,7 @@ export class Product {
   public image: Buffer;
   public price: number;
   public idCat: number;
+  public stock?: number;
   public promotions?: number[];
   public baja: Baja;
 
@@ -16,6 +17,7 @@ export class Product {
     image: Buffer,
     idCat: number,
     price: number,
+    stock?: number,
     promotions?: number[],
     baja?: Baja,
     id?: number
@@ -26,6 +28,7 @@ export class Product {
     this.image = image;
     this.price = price;
     this.idCat = idCat;
+    this.stock = stock;
     this.promotions = promotions;
     this.baja = baja || 0;
   }

@@ -74,7 +74,7 @@ export const insertProduct = async (req: Request, res: Response) => {
   let connection = null;
   try {
     let resizedImage: Buffer = Buffer.from([]);
-    const { name, description, image, idCat, price } = req.body;
+    const { name, description, image, idCat, stock, price } = req.body;
 
     if (image) resizedImage = await sharp(image.buffer).resize(400).toBuffer();
 
@@ -96,6 +96,7 @@ export const insertProduct = async (req: Request, res: Response) => {
       description,
       resizedImage,
       price,
+      stock,
       idCat
     );
 
@@ -108,6 +109,7 @@ export const insertProduct = async (req: Request, res: Response) => {
         newProduct.description,
         newProduct.image,
         newProduct.idCat,
+        newProduct.stock,
       ]
     );
     await connection.query<DbQueryInsert>(QueryConstants.INSERT_PRICE, [
@@ -164,6 +166,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         resizedImage,
         updateData.idCat,
         updateData.baja,
+        updateData.stock,
         updateData.price,
         id,
       ]
