@@ -7,6 +7,7 @@ import {
   insertProduct,
   updateProduct,
   deleteProduct,
+  getProductsByType,
 } from "../product/controllers/product";
 
 import validatorProduct from "../product/validators/product";
@@ -17,6 +18,7 @@ const router = express.Router();
 
 router.get("/", getProducts);
 router.get("/:id", getProduct);
+router.get("/type/:typeId", getProductsByType);
 router.post(
   "/",
   [verifyToken, isAdmin],
