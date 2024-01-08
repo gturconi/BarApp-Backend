@@ -272,6 +272,12 @@ export const deleteProduct = async (req: Request, res: Response) => {
       error,
     });
   } finally {
-    if (connection) await connection.release();
+    if (connection) {
+      try {
+        await connection.release();
+      } catch (releaseError) {
+        console.error("Error al liberar la conexión:", releaseError);
+      }
+    }
   }
 };
