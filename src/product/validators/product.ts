@@ -17,7 +17,10 @@ const validatorProduct: ((
         price: req.body.price ? parseFloat(req.body.price) : undefined,
         idCat: req.body.idCat ? parseInt(req.body.idCat) : undefined,
         promotions: req.body.promotions,
-        baja: req.body.baja ? parseInt(req.body.baja) : undefined,
+        baja:
+          req.body.baja !== null && req.body.baja !== undefined
+            ? parseInt(req.body.baja)
+            : undefined,
         stock: req.body.stock ? parseInt(req.body.stock) : undefined,
       };
 
