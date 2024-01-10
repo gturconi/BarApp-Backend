@@ -44,43 +44,6 @@ export const getProducts = async (req: Request, res: Response) => {
   }
 };
 
-export const getProductsByType = async (req: Request, res: Response) => {
-  const page = parseInt(req.query.page as string) || 1;
-  const perPage = parseInt(req.query.limit as string) || 10;
-
-  const search = (req.query.search as string) || "";
-
-  const { typeId } = req.params;
-
-  try {
-    const [totalRows] = await pool.query<DbQueryResult<any[]>>(
-      QueryConstants.COUNT_PRODUCTS_BY_TYPE,
-      [typeId, search, search, search, search]
-    );
-
-    const totalProducts = totalRows[0].total;
-    const totalPages = Math.ceil(totalProducts / perPage);
-    const startIndex = (page - 1) * perPage;
-
-    const [products] = await pool.query<DbQueryResult<Product[]>>(
-      QueryConstants.SELECT_PRODUCTS_BY_TYPE,
-      [typeId, search, search, search, search, startIndex, perPage]
-    );
-
-    return res.json(
-      new EntityListResponse(products, totalProducts, page, totalPages)
-    );
-  } catch (error) {
-    console.log(error);
-    return handleServerError({
-      res,
-      message:
-        "Ocurrio un error al obtener la lista de Productos filtrada por tipo de producto",
-      errorNumber: 500,
-    });
-  }
-};
-
 export const getProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
