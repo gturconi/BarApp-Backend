@@ -51,7 +51,9 @@ export async function verifyToken(
 
     next();
   } catch (error) {
-    return res.status(401).json({ message: "No autorizado!" });
+    return res
+      .status(401)
+      .json({ message: "Sesion expirada, por favor inicie sesion nuevamente" });
   }
 }
 
