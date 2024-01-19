@@ -1,7 +1,10 @@
-import { z } from "zod";
-import { Request, Response, NextFunction } from "express";
-import { MAX_FILE_SIZE } from "../../shared/constants";
-import { detectImageFormat } from "../../shared/utils/detectImageFormat";
+import { z } from 'zod';
+import { Request, Response, NextFunction } from 'express';
+import { MAX_FILE_SIZE } from '../../shared/constants';
+import { detectImageFormat } from '../../shared/utils/detectImageFormat';
+import { customErrorMap } from '../../shared/utils/customErrorMap';
+
+z.setErrorMap(customErrorMap);
 
 const validatorProduct: ((
   req: Request,
@@ -24,78 +27,78 @@ const validatorProduct: ((
         stock: req.body.stock ? parseInt(req.body.stock) : undefined,
       };
 
-      const isPutRequest = req.method === "PUT";
+      const isPutRequest = req.method === 'PUT';
 
       const nameValidation = z
         .string({
-          required_error: "El campo nombre no puede estar vacío",
-          invalid_type_error: "El campo nombre debe ser una cadena de texto",
+          required_error: 'El campo nombre no puede estar vacío',
+          invalid_type_error: 'El campo nombre debe ser una cadena de texto',
         })
         .min(1, {
-          message: "El campo nombre debe tener al menos un caracter",
+          message: 'El campo nombre debe tener al menos un caracter',
         });
 
       const descriptionValidation = z
         .string({
-          required_error: "El campo descripción no puede estar vacío",
+          required_error: 'El campo descripción no puede estar vacío',
           invalid_type_error:
-            "El campo descripción debe ser una cadena de texto",
+            'El campo descripción debe ser una cadena de texto',
         })
         .min(1, {
-          message: "El campo descripción debe tener al menos un caracter",
+          message: 'El campo descripción debe tener al menos un caracter',
         });
 
       const imageValidation = z.object({
         originalname: z.string({
-          invalid_type_error: "Formato invalido",
+          invalid_type_error: 'Formato invalido',
         }),
         buffer: z
           .instanceof(Buffer)
           .refine(
             (buffer) => buffer?.length <= MAX_FILE_SIZE,
-            "El tamaño máximo permitido es 5MB"
+            'El tamaño máximo permitido es 5MB'
           )
           .refine((buffer) => {
-            const validImageFormats = ["image/jpeg", "image/png"];
+            const validImageFormats = ['image/jpeg', 'image/png'];
             const detectedFormat = detectImageFormat(buffer);
 
             return validImageFormats.includes(detectedFormat!);
-          }, "El formato de la foto debe ser jpg o png"),
+          }, 'El formato de la foto debe ser jpg o png'),
       });
 
       const priceValidation = z
         .number({
-          invalid_type_error: "El campo precio debe ser un número",
+          invalid_type_error: 'El campo precio debe ser un número',
         })
         .min(0, {
-          message: "El campo precio debe ser mayor a 0",
+          message: 'El campo precio debe ser mayor a 0',
         });
 
       const idCatValidation = z.number({
-        invalid_type_error: "El campo tipo de producto debe ser un número",
+        invalid_type_error: 'El campo tipo de producto debe ser un número',
       });
 
       const promotionsValidation = z.array(
         z.number({
           invalid_type_error:
-            "El campo promociones debe ser un arreglo de números",
+            'El campo promociones debe ser un arreglo de números',
         })
       );
 
       const baja = z
         .number({
-          invalid_type_error: "El campo baja debe ser un número",
+          invalid_type_error: 'El campo baja debe ser un número',
         })
         .refine((value) => value === 0 || value === 1, {
-          message: "El campo baja debe ser 0 o 1",
+          message: 'El campo baja debe ser 0 o 1',
         });
 
       const stock = z
         .number({
-          invalid_type_error: "El campo stock debe ser un número",
+          invalid_type_error: 'El campo stock debe ser un número',
         })
         .refine((value) => value === 0 || value === 1, {
-          message: "El campo stock debe ser 0 o 1",
+          message: 'El campo stock debe ser 0 o 1',
         });
 
       const schema = z.object({

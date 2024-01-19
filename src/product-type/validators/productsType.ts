@@ -1,7 +1,10 @@
-import { z } from "zod";
-import { Request, Response, NextFunction } from "express";
-import { MAX_FILE_SIZE } from "../../shared/constants";
-import { detectImageFormat } from "../../shared/utils/detectImageFormat";
+import { z } from 'zod';
+import { Request, Response, NextFunction } from 'express';
+import { MAX_FILE_SIZE } from '../../shared/constants';
+import { detectImageFormat } from '../../shared/utils/detectImageFormat';
+import { customErrorMap } from '../../shared/utils/customErrorMap';
+
+z.setErrorMap(customErrorMap);
 
 const validatorProductType: ((
   req: Request,
@@ -15,37 +18,37 @@ const validatorProductType: ((
         image: req.file,
       };
 
-      const isPutRequest = req.method === "PUT";
+      const isPutRequest = req.method === 'PUT';
 
       const descriptionValidation = z
         .string({
-          required_error: "El campo descripción no puede estar vacío",
+          required_error: 'El campo descripción no puede estar vacío',
           invalid_type_error:
-            "El campo descripción debe ser una cadena de texto",
+            'El campo descripción debe ser una cadena de texto',
         })
         .min(1, {
-          message: "El campo descripción debe tener al menos un caracter",
+          message: 'El campo descripción debe tener al menos un caracter',
         })
         .regex(/^[A-Za-z\s]+$/, {
-          message: "El campo descripcion debe contener solo letras",
+          message: 'El campo descripcion debe contener solo letras',
         });
 
       const imageValidation = z.object({
         originalname: z.string({
-          invalid_type_error: "Formato invalido",
+          invalid_type_error: 'Formato invalido',
         }),
         buffer: z
           .instanceof(Buffer)
           .refine(
             (buffer) => buffer?.length <= MAX_FILE_SIZE,
-            "El tamaño máximo permitido es 5MB"
+            'El tamaño máximo permitido es 5MB'
           )
           .refine((buffer) => {
-            const validImageFormats = ["image/jpeg", "image/png"];
+            const validImageFormats = ['image/jpeg', 'image/png'];
             const detectedFormat = detectImageFormat(buffer);
 
             return validImageFormats.includes(detectedFormat!);
-          }, "El formato de la foto debe ser jpg o png"),
+          }, 'El formato de la foto debe ser jpg o png'),
       });
 
       const schema = z.object({
