@@ -13,7 +13,7 @@ export const INSERT_PRODUCT =
   'INSERT INTO products (name, description, image, idCat, stock) VALUES (?, ?, ?, ?, ?);';
 
 export const INSERT_PRICE =
-  'INSERT INTO productPrice (idProd, valid_from, price, stock) VALUES (?, NOW(), ?);';
+  'INSERT INTO productPrice (idProd, valid_from, price) VALUES (?, NOW(), ?);';
 
 export const UPDATE_PRODUCT =
   'UPDATE products p INNER JOIN productPrice pre ON p.id = pre.idProd SET p.name = IFNULL(?, p.name), p.description = IFNULL(?, p.description), p.image = IFNULL(?, p.image), p.idCat = IFNULL(?, p.idCat), p.baja = IFNULL(?, p.baja), p.stock = IFNULL(?, p.stock), pre.price = IFNULL(?, pre.price) WHERE p.id = ?';
