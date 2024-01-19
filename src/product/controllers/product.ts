@@ -99,7 +99,6 @@ export const insertProduct = async (req: Request, res: Response) => {
       price,
       stock
     );
-    console.log(newProduct);
     connection = await pool.getConnection();
     await connection.beginTransaction();
     const savedProduct = await connection.query<DbQueryInsert>(
@@ -131,7 +130,6 @@ export const insertProduct = async (req: Request, res: Response) => {
 
     res.send({ product: ProductInserted[0] });
   } catch (error) {
-    console.error(error);
     if (connection) await connection.rollback();
     return handleServerError({
       res,
