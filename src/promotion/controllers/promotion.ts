@@ -41,3 +41,28 @@ export const getPromotions = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getPromotion = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query<DbQueryResult<Promotion[]>>(
+      QueryConstants.SELECT_PROMOTION_BY_ID,
+      [id]
+    );
+
+    if (rows.length <= 0) {
+      return handleServerError({
+        res,
+        message: 'Promocion no encontrada',
+        errorNumber: 404,
+      });
+    }
+    return res.status(200).json(rows[0]);
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al obtener la promocion',
+      errorNumber: 500,
+    });
+  }
+};

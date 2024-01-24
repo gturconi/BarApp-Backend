@@ -64,7 +64,7 @@ export const getProduct = async (req: Request, res: Response) => {
     console.log(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener la lista de Productos',
+      message: 'Ocurrio un error al obtener el producto',
       errorNumber: 500,
     });
   }
