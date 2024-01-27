@@ -20,8 +20,8 @@ export class Promotion {
     valid_from?: Date,
     valid_to?: Date,
     discount?: number,
-    baja?: Baja,
-    days?: number[]
+    days?: number[],
+    baja?: Baja
   ) {
     this.id = 0;
     this.description = description;

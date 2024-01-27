@@ -16,12 +16,14 @@ const validatorPromotion: ((
       req.body = {
         description: req.body.description,
         image: req.file,
-        valid_from: new Date(req.body.valid_from),
-        valid_to: new Date(req.body.valid_to),
-        discount: req.body.discount,
-        price: req.body.price,
-        products: req.body.products,
-        days: req.body.days,
+        valid_from: req.body.valid_from
+          ? new Date(req.body.valid_from)
+          : undefined,
+        valid_to: req.body.valid_to ? new Date(req.body.valid_to) : undefined,
+        discount: req.body.discount ? parseFloat(req.body.discount) : undefined,
+        price: req.body.price ? parseFloat(req.body.price) : undefined,
+        products: JSON.parse(req.body.products),
+        days: req.body.days ? JSON.parse(req.body.days) : undefined,
         baja:
           req.body.baja !== null && req.body.baja !== undefined
             ? parseInt(req.body.baja)
@@ -29,6 +31,25 @@ const validatorPromotion: ((
       };
 
       const isPutRequest = req.method === 'PUT';
+
+      if (
+        req.body.valid_to &&
+        req.body.valid_from &&
+        req.body.valid_from >= req.body.valid_to
+      ) {
+        return res.status(400).json({
+          message: 'La fecha hasta debe ser mayor que la fecha desde',
+        });
+      }
+
+      if (
+        (req.body.valid_to && !req.body.valid_from) ||
+        (!req.body.valid_to && req.body.valid_from)
+      ) {
+        return res.status(400).json({
+          message: 'Una de las fechas es nula',
+        });
+      }
 
       const descriptionValidation = z
         .string({
@@ -58,31 +79,19 @@ const validatorPromotion: ((
           }, 'El formato de la foto debe ser jpg o png'),
       });
 
-      const validFromDateValidation = z.date({
+      const validFromDateValidation = z.coerce.date({
         invalid_type_error: 'El campo valid_from debe ser una fecha válida',
       });
 
-      const validToDateValidation = z.date({
+      const validToDateValidation = z.coerce.date({
         invalid_type_error: 'El campo valid_to debe ser una fecha válida',
       });
-
-      const dates = z.object({
-        valid_from: req.body.valid_from,
-        valid_to: req.body.valid_to,
-      });
-
-      const validToGreaterThanFromValidation = dates.refine(
-        (dates) => dates.valid_from < dates.valid_to,
-        {
-          message: 'El campo valid_to debe ser mayor que valid_from',
-        }
-      );
 
       const priceValidation = z
         .number({
           invalid_type_error: 'El campo precio debe ser un número',
         })
-        .min(0, {
+        .min(1, {
           message: 'El campo precio debe ser mayor a 0',
         });
 
@@ -90,7 +99,7 @@ const validatorPromotion: ((
         .number({
           invalid_type_error: 'El campo descuento debe ser un número',
         })
-        .refine((value) => value >= 0 && value <= 1, {
+        .refine((value) => value > 0 && value <= 1, {
           message: 'El campo descuento debe ser un número flotante entre 0 y 1',
         });
 
@@ -102,9 +111,13 @@ const validatorPromotion: ((
       );
 
       const daysValidation = z.array(
-        z.number({
-          invalid_type_error: 'El campo dias debe ser un arreglo de números',
-        })
+        z
+          .number({
+            invalid_type_error: 'El campo dias debe ser un arreglo de números',
+          })
+          .refine((day) => day >= 1 && day <= 7, {
+            message: 'El campo dias debe ser un número entre 1 y 7',
+          })
       );
 
       const baja = z
@@ -121,18 +134,27 @@ const validatorPromotion: ((
           : descriptionValidation,
         image: isPutRequest ? imageValidation.optional() : imageValidation,
         valid_from: validFromDateValidation.optional(),
-        valid_to: validToDateValidation
-          .optional()
-          .and(validToGreaterThanFromValidation)
-          .optional(),
+        valid_to: validToDateValidation.optional(),
         discount: discountValidation.optional(),
         price: priceValidation.optional(),
         days: daysValidation.optional(),
         products: isPutRequest
           ? productsValidation.optional()
           : productsValidation,
+        baja: baja.optional(),
       });
+
+      const validatedData = schema.safeParse(req.body);
+
+      if (validatedData.success) {
+        next();
+      } else {
+        return res
+          .status(400)
+          .json({ message: validatedData.error.formErrors.fieldErrors });
+      }
     } catch (error) {
+      console.log(error);
       return res.status(500).json(error);
     }
   },
