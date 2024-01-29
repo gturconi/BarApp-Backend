@@ -22,7 +22,7 @@ const validatorPromotion: ((
         valid_to: req.body.valid_to ? new Date(req.body.valid_to) : undefined,
         discount: req.body.discount ? parseFloat(req.body.discount) : undefined,
         price: req.body.price ? parseFloat(req.body.price) : undefined,
-        products: JSON.parse(req.body.products),
+        products: req.body.products ? JSON.parse(req.body.products) : undefined,
         days: req.body.days ? JSON.parse(req.body.days) : undefined,
         baja:
           req.body.baja !== null && req.body.baja !== undefined
@@ -43,8 +43,9 @@ const validatorPromotion: ((
       }
 
       if (
-        (req.body.valid_to && !req.body.valid_from) ||
-        (!req.body.valid_to && req.body.valid_from)
+        !isPutRequest &&
+        ((req.body.valid_to && !req.body.valid_from) ||
+          (!req.body.valid_to && req.body.valid_from))
       ) {
         return res.status(400).json({
           message: 'Una de las fechas es nula',

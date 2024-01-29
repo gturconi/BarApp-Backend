@@ -5,6 +5,7 @@ import {
   getPromotions,
   getPromotion,
   insertPromotion,
+  updatePromotion,
 } from '../promotion/controllers/promotion';
 
 import { isAdmin, verifyToken } from '../middlewares/authJwt';
@@ -21,6 +22,14 @@ router.post(
   upload.single('image'),
   validatorPromotion,
   insertPromotion
+);
+
+router.put(
+  '/:id',
+  [verifyToken, isAdmin],
+  upload.single('image'),
+  validatorPromotion,
+  updatePromotion
 );
 
 export default router;

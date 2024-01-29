@@ -153,6 +153,119 @@ export const insertPromotion = async (req: Request, res: Response) => {
 
     res.send({ promotion: PromotionInserted[0] });
   } catch (error) {
+    if (connection) await connection.rollback();
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al insertar la promocion',
+      errorNumber: 500,
+    });
+  } finally {
+    if (connection) await connection.release();
+  }
+};
+
+export const updatePromotion = async (req: Request, res: Response) => {
+  let connection: PoolConnection | null = null;
+  try {
+    let resizedImage = null;
+
+    const { id } = req.params;
+    const updateData = { ...req.body };
+    const newImage = req.file;
+
+    if (newImage) {
+      resizedImage = Buffer.from([]);
+      resizedImage = await sharp(newImage.buffer).resize(400).toBuffer();
+    }
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    const [oldPromotion] = await pool.query<DbQueryResult<Promotion[]>>(
+      QueryConstants.SELECT_PROMOTION_BY_ID,
+      [id]
+    );
+
+    if (oldPromotion.length <= 0) {
+      return handleServerError({
+        res,
+        message: 'Promocion no encontrada',
+        errorNumber: 404,
+      });
+    }
+
+    if (
+      req.body.valid_from &&
+      !req.body.valid_to &&
+      req.body.valid_from > oldPromotion[0].valid_to!
+    ) {
+      return handleServerError({
+        res,
+        message: 'La fecha de inicio no puede ser mayor a la fecha de fin',
+        errorNumber: 400,
+      });
+    } else if (
+      !req.body.valid_from &&
+      req.body.valid_to &&
+      req.body.valid_to < oldPromotion[0].valid_from!
+    ) {
+      return handleServerError({
+        res,
+        message: 'La fecha de fin no puede ser menor a la fecha de inicio',
+        errorNumber: 400,
+      });
+    }
+
+    const updatePromotion = await connection.query<DbQueryInsert>(
+      QueryConstants.UPDATE_PROMOTION,
+      [
+        updateData.description,
+        updateData.valid_from,
+        updateData.valid_to,
+        updateData.discount,
+        updateData.baja,
+        resizedImage,
+        updateData.price,
+        id,
+      ]
+    );
+
+    if (req.body.products) {
+      let newProductList = req.body.products.filter((newProduct: string) => {
+        return !oldPromotion[0].products.includes(Number(newProduct));
+      });
+      console.log(oldPromotion[0].products);
+
+      newProductList.forEach(async (product: string) => {
+        await connection!.query<DbQueryInsert>(
+          QueryConstants.INSERT_PRODUCT_PROMOTION,
+          [id, product]
+        );
+      });
+    }
+
+    if (req.body.days) {
+      req.body.days.forEach(async (day: string) => {
+        await connection!.query<DbQueryInsert>(
+          QueryConstants.INSERT_PROMOTION_DAYS,
+          [day, id]
+        );
+      });
+    }
+
+    await connection.commit();
+
+    if (updatePromotion[0].affectedRows <= 0) {
+      return res.status(200).json(updatePromotion);
+    }
+
+    const [newPromotion] = await pool.query<DbQueryResult<Promotion[]>>(
+      QueryConstants.SELECT_PROMOTION_BY_ID,
+      [id]
+    );
+
+    res.send(newPromotion[0]);
+  } catch (error) {
     console.log(error);
     if (connection) await connection.rollback();
     return handleServerError({
