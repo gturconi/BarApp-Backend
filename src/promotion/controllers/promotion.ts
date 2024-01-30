@@ -80,7 +80,7 @@ export const insertPromotion = async (req: Request, res: Response) => {
       discount,
       price,
       products,
-      days,
+      days_of_week,
     } = req.body;
 
     if (image) resizedImage = await sharp(image.buffer).resize(400).toBuffer();
@@ -106,7 +106,7 @@ export const insertPromotion = async (req: Request, res: Response) => {
       valid_from,
       valid_to,
       discount,
-      days
+      days_of_week
     );
 
     connection = await pool.getConnection();
@@ -130,8 +130,8 @@ export const insertPromotion = async (req: Request, res: Response) => {
       );
     });
 
-    if (newPromotion.days) {
-      newPromotion.days.forEach(async (day) => {
+    if (newPromotion.days_of_week) {
+      newPromotion.days_of_week.forEach(async (day) => {
         await connection!.query<DbQueryInsert>(
           QueryConstants.INSERT_PROMOTION_DAYS,
           [savedProm[0].insertId, day]
@@ -231,26 +231,70 @@ export const updatePromotion = async (req: Request, res: Response) => {
     );
 
     if (req.body.products) {
-      let newProductList = req.body.products.filter((newProduct: string) => {
-        return !oldPromotion[0].products.includes(Number(newProduct));
+      let productsToAdd = req.body.products.filter((newProduct: string) => {
+        return !oldPromotion[0].products.some(
+          (oldProduct: any) => oldProduct.product_id === newProduct
+        );
       });
-      console.log(oldPromotion[0].products);
 
-      newProductList.forEach(async (product: string) => {
+      productsToAdd.forEach(async (product: string) => {
         await connection!.query<DbQueryInsert>(
           QueryConstants.INSERT_PRODUCT_PROMOTION,
           [id, product]
         );
       });
-    }
 
-    if (req.body.days) {
-      req.body.days.forEach(async (day: string) => {
+      const productsToRemove = oldPromotion[0].products.filter(
+        (oldProduct: any) => {
+          return !req.body.products.includes(oldProduct.product_id);
+        }
+      );
+
+      productsToRemove.forEach(async (product: any) => {
         await connection!.query<DbQueryInsert>(
-          QueryConstants.INSERT_PROMOTION_DAYS,
-          [day, id]
+          QueryConstants.DELETE_PROMOTION_PRODUCTS,
+          [id, product.product_id]
         );
       });
+    }
+
+    if (req.body.days_of_week) {
+      if (oldPromotion[0].days_of_week) {
+        let days_of_weekForAdd = req.body.days_of_week.filter(
+          (newDay: string) => {
+            return !oldPromotion[0].days_of_week!.some(
+              (oldDay: any) => oldDay === newDay
+            );
+          }
+        );
+
+        days_of_weekForAdd.forEach(async (day: string) => {
+          await connection!.query<DbQueryInsert>(
+            QueryConstants.INSERT_PROMOTION_DAYS,
+            [id, day]
+          );
+        });
+
+        const days_of_weekToRemove = oldPromotion[0].days_of_week!.filter(
+          (oldDay: any) => {
+            return !req.body.days_of_week.includes(oldDay);
+          }
+        );
+
+        days_of_weekToRemove.forEach(async (day: any) => {
+          await connection!.query<DbQueryInsert>(
+            QueryConstants.DELETE_PROMOTION_DAYS,
+            [id, day]
+          );
+        });
+      } else {
+        req.body.days_of_week.forEach(async (day: string) => {
+          await connection!.query<DbQueryInsert>(
+            QueryConstants.INSERT_PROMOTION_DAYS,
+            [id, day]
+          );
+        });
+      }
     }
 
     await connection.commit();

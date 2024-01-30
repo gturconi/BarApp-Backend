@@ -23,7 +23,9 @@ const validatorPromotion: ((
         discount: req.body.discount ? parseFloat(req.body.discount) : undefined,
         price: req.body.price ? parseFloat(req.body.price) : undefined,
         products: req.body.products ? JSON.parse(req.body.products) : undefined,
-        days: req.body.days ? JSON.parse(req.body.days) : undefined,
+        days_of_week: req.body.days_of_week
+          ? JSON.parse(req.body.days_of_week)
+          : undefined,
         baja:
           req.body.baja !== null && req.body.baja !== undefined
             ? parseInt(req.body.baja)
@@ -111,7 +113,7 @@ const validatorPromotion: ((
         })
       );
 
-      const daysValidation = z.array(
+      const days_of_weekValidation = z.array(
         z
           .number({
             invalid_type_error: 'El campo dias debe ser un arreglo de números',
@@ -138,7 +140,7 @@ const validatorPromotion: ((
         valid_to: validToDateValidation.optional(),
         discount: discountValidation.optional(),
         price: priceValidation.optional(),
-        days: daysValidation.optional(),
+        days_of_week: days_of_weekValidation.optional(),
         products: isPutRequest
           ? productsValidation.optional()
           : productsValidation,

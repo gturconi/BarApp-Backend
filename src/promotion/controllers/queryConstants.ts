@@ -30,3 +30,9 @@ export const UPDATE_PROMOTION_PRODUCTS =
 
 export const UPDATE_PROMOTION_DAYS =
   'UPDATE promotionDays SET day_of_week = ? WHERE promotion_id = ?';
+
+export const DELETE_PROMOTION_PRODUCTS =
+  'DELETE FROM products_promotions WHERE idProm = ? AND idProd = ?';
+
+export const DELETE_PROMOTION_DAYS =
+  'DELETE FROM promotionDays WHERE promotion_id = ? AND day_of_week = ?';

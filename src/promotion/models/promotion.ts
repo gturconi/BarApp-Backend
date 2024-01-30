@@ -10,7 +10,7 @@ export class Promotion {
   public price?: number;
   public baja?: Baja;
   public products: number[];
-  public days?: number[];
+  public days_of_week?: number[];
 
   constructor(
     description: string,
@@ -20,7 +20,7 @@ export class Promotion {
     valid_from?: Date,
     valid_to?: Date,
     discount?: number,
-    days?: number[],
+    days_of_week?: number[],
     baja?: Baja
   ) {
     this.id = 0;
@@ -31,7 +31,7 @@ export class Promotion {
     this.image = image;
     this.baja = baja || 0;
     this.products = products || [];
-    this.days = days || [];
+    this.days_of_week = days_of_week || [];
     this.price = price;
   }
 }
