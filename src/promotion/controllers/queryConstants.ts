@@ -43,3 +43,6 @@ export const DELETE_DAYS = 'DELETE FROM promotionDays WHERE promotion_id = ?';
 
 export const DELETE_PRODUCTS =
   'DELETE FROM products_promotions WHERE idProm = ?';
+
+export const SELECT_PROMOTION_BY_PRODUCT =
+  'SELECT * FROM products_promotions WHERE idProd = ?';

@@ -4,11 +4,13 @@ import sharp from 'sharp';
 import { DbQueryInsert, DbQueryResult } from '../../shared/queryTypes';
 import pool from '../../shared/db/conn';
 import * as QueryConstants from './queryConstants';
+import * as PromQueryConstants from '../../promotion/controllers/queryConstants';
 
 import { handleServerError } from '../../shared/errorHandler';
 
 import { EntityListResponse } from '../../shared/models/entity.list.response.model';
 import { Product } from '../models/product';
+import { Promotion } from '../../promotion/models/promotion';
 
 export const getProducts = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
@@ -209,6 +211,20 @@ export const deleteProduct = async (req: Request, res: Response) => {
         res,
         message: 'Producto no encontrado',
         errorNumber: 404,
+      });
+    }
+
+    const [promotions] = await pool.query<DbQueryResult<Promotion[]>>(
+      PromQueryConstants.SELECT_PROMOTION_BY_PRODUCT,
+      [id]
+    );
+
+    if (promotions.length > 0) {
+      return handleServerError({
+        res,
+        message:
+          'No se puede eliminar el producto porque tiene promociones asociadas',
+        errorNumber: 400,
       });
     }
 
