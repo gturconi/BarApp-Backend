@@ -9,7 +9,7 @@ import { handleServerError } from '../../shared/errorHandler';
 
 import { EntityListResponse } from '../../shared/models/entity.list.response.model';
 import { Promotion } from '../models/promotion';
-import { PoolConnection } from 'mysql2/promise';
+import { FieldPacket, PoolConnection, ResultSetHeader } from 'mysql2/promise';
 
 export const getPromotions = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
@@ -181,12 +181,9 @@ export const updatePromotion = async (req: Request, res: Response) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    const [oldPromotion] = await pool.query<DbQueryResult<Promotion[]>>(
-      QueryConstants.SELECT_PROMOTION_BY_ID,
-      [id]
-    );
+    const oldPromotion = await getPromotionById(connection, id);
 
-    if (oldPromotion.length <= 0) {
+    if (!oldPromotion) {
       return handleServerError({
         res,
         message: 'Promocion no encontrada',
@@ -194,10 +191,12 @@ export const updatePromotion = async (req: Request, res: Response) => {
       });
     }
 
+    //Validacion de fechas
+
     if (
       req.body.valid_from &&
       !req.body.valid_to &&
-      req.body.valid_from > oldPromotion[0].valid_to!
+      req.body.valid_from > oldPromotion.valid_to!
     ) {
       return handleServerError({
         res,
@@ -207,7 +206,7 @@ export const updatePromotion = async (req: Request, res: Response) => {
     } else if (
       !req.body.valid_from &&
       req.body.valid_to &&
-      req.body.valid_to < oldPromotion[0].valid_from!
+      req.body.valid_to < oldPromotion.valid_from!
     ) {
       return handleServerError({
         res,
@@ -216,85 +215,43 @@ export const updatePromotion = async (req: Request, res: Response) => {
       });
     }
 
-    const updatePromotion = await connection.query<DbQueryInsert>(
-      QueryConstants.UPDATE_PROMOTION,
-      [
-        updateData.description,
-        updateData.valid_from,
-        updateData.valid_to,
-        updateData.discount,
-        updateData.baja,
-        resizedImage,
-        updateData.price,
-        id,
-      ]
+    const updatePromotion = await updatePromotionData(
+      connection,
+      id,
+      updateData,
+      resizedImage
     );
 
     if (req.body.products) {
-      let productsToAdd = req.body.products.filter((newProduct: string) => {
-        return !oldPromotion[0].products.some(
-          (oldProduct: any) => oldProduct.product_id === newProduct
-        );
-      });
-
-      productsToAdd.forEach(async (product: string) => {
-        await connection!.query<DbQueryInsert>(
-          QueryConstants.INSERT_PRODUCT_PROMOTION,
-          [id, product]
-        );
-      });
-
-      const productsToRemove = oldPromotion[0].products.filter(
-        (oldProduct: any) => {
-          return !req.body.products.includes(oldProduct.product_id);
-        }
+      await addProductsToPromotion(
+        connection,
+        id,
+        req.body.products,
+        oldPromotion.products
       );
 
-      productsToRemove.forEach(async (product: any) => {
-        await connection!.query<DbQueryInsert>(
-          QueryConstants.DELETE_PROMOTION_PRODUCTS,
-          [id, product.product_id]
-        );
-      });
+      await removeProductsFromPromotion(
+        connection,
+        id,
+        req.body.products,
+        oldPromotion.products
+      );
     }
 
     if (req.body.days_of_week) {
-      if (oldPromotion[0].days_of_week) {
-        let days_of_weekForAdd = req.body.days_of_week.filter(
-          (newDay: string) => {
-            return !oldPromotion[0].days_of_week!.some(
-              (oldDay: any) => oldDay === newDay
-            );
-          }
-        );
+      await addDaysOfWeekToPromotion(
+        connection,
+        id,
+        req.body.days_of_week,
+        oldPromotion.days_of_week || null
+      );
 
-        days_of_weekForAdd.forEach(async (day: string) => {
-          await connection!.query<DbQueryInsert>(
-            QueryConstants.INSERT_PROMOTION_DAYS,
-            [id, day]
-          );
-        });
-
-        const days_of_weekToRemove = oldPromotion[0].days_of_week!.filter(
-          (oldDay: any) => {
-            return !req.body.days_of_week.includes(oldDay);
-          }
-        );
-
-        days_of_weekToRemove.forEach(async (day: any) => {
-          await connection!.query<DbQueryInsert>(
-            QueryConstants.DELETE_PROMOTION_DAYS,
-            [id, day]
-          );
-        });
-      } else {
-        req.body.days_of_week.forEach(async (day: string) => {
-          await connection!.query<DbQueryInsert>(
-            QueryConstants.INSERT_PROMOTION_DAYS,
-            [id, day]
-          );
-        });
-      }
+      await removeDaysOfWeekFromPromotion(
+        connection,
+        id,
+        req.body.days_of_week,
+        oldPromotion.days_of_week || null
+      );
     }
 
     await connection.commit();
@@ -303,12 +260,9 @@ export const updatePromotion = async (req: Request, res: Response) => {
       return res.status(200).json(updatePromotion);
     }
 
-    const [newPromotion] = await pool.query<DbQueryResult<Promotion[]>>(
-      QueryConstants.SELECT_PROMOTION_BY_ID,
-      [id]
-    );
+    const newPromotion = await getPromotionById(connection, id);
 
-    res.send(newPromotion[0]);
+    res.send(newPromotion);
   } catch (error) {
     console.log(error);
     if (connection) await connection.rollback();
@@ -319,5 +273,181 @@ export const updatePromotion = async (req: Request, res: Response) => {
     });
   } finally {
     if (connection) await connection.release();
+  }
+};
+
+export const getPromotionById = async (
+  connection: PoolConnection,
+  id: string
+): Promise<Promotion | null> => {
+  const [rows] = await connection.query<DbQueryResult<Promotion[]>>(
+    QueryConstants.SELECT_PROMOTION_BY_ID,
+    [id]
+  );
+  return rows.length > 0 ? rows[0] : null;
+};
+
+export const updatePromotionData = async (
+  connection: PoolConnection,
+  id: string,
+  updateData: any,
+  resizedImage: Buffer | null
+): Promise<[ResultSetHeader, FieldPacket[]]> => {
+  return await connection.query<DbQueryInsert>(
+    QueryConstants.UPDATE_PROMOTION,
+    [
+      updateData.description,
+      updateData.valid_from,
+      updateData.valid_to,
+      updateData.discount,
+      updateData.baja,
+      resizedImage,
+      updateData.price,
+      id,
+    ]
+  );
+};
+
+export const addProductsToPromotion = async (
+  connection: PoolConnection,
+  id: string,
+  newProducts: string[],
+  oldProducts: any[]
+): Promise<void> => {
+  const productsToAdd = newProducts.filter((newProduct: string) => {
+    return !oldProducts.some(
+      (oldProduct: any) => oldProduct.product_id === newProduct
+    );
+  });
+  for (const product of productsToAdd) {
+    await connection.query<DbQueryInsert>(
+      QueryConstants.INSERT_PRODUCT_PROMOTION,
+      [id, product]
+    );
+  }
+};
+
+export const removeProductsFromPromotion = async (
+  connection: PoolConnection,
+  id: string,
+  newProducts: string[],
+  oldProducts: any[]
+): Promise<void> => {
+  const productsToRemove = oldProducts.filter((oldProduct: any) => {
+    return !newProducts.includes(oldProduct.product_id);
+  });
+
+  for (const product of productsToRemove) {
+    await connection.query<DbQueryInsert>(
+      QueryConstants.DELETE_PROMOTION_PRODUCTS,
+      [id, product.product_id]
+    );
+  }
+};
+
+export const addDaysOfWeekToPromotion = async (
+  connection: PoolConnection,
+  id: string,
+  newDaysOfWeek: number[],
+  oldDaysOfWeek: number[] | null
+): Promise<void> => {
+  if (!oldDaysOfWeek) {
+    for (const day of newDaysOfWeek) {
+      await connection.query<DbQueryInsert>(
+        QueryConstants.INSERT_PROMOTION_DAYS,
+        [id, day]
+      );
+    }
+    return;
+  }
+
+  const daysOfWeekToAdd = newDaysOfWeek.filter((newDay: number) => {
+    return !oldDaysOfWeek.includes(newDay);
+  });
+
+  for (const day of daysOfWeekToAdd) {
+    await connection.query<DbQueryInsert>(
+      QueryConstants.INSERT_PROMOTION_DAYS,
+      [id, day]
+    );
+  }
+};
+
+export const removeDaysOfWeekFromPromotion = async (
+  connection: PoolConnection,
+  id: string,
+  newDaysOfWeek: number[],
+  oldDaysOfWeek: number[] | null
+): Promise<void> => {
+  if (!oldDaysOfWeek) {
+    return;
+  }
+
+  const daysOfWeekToRemove = oldDaysOfWeek.filter((oldDay: any) => {
+    return !newDaysOfWeek.includes(oldDay);
+  });
+
+  for (const day of daysOfWeekToRemove) {
+    await connection.query<DbQueryInsert>(
+      QueryConstants.DELETE_PROMOTION_DAYS,
+      [id, day]
+    );
+  }
+};
+
+export const deletePromotion = async (req: Request, res: Response) => {
+  let connection = null;
+  try {
+    const { id } = req.params;
+    const [promotion] = await pool.query<DbQueryResult<Promotion[]>>(
+      QueryConstants.SELECT_PROMOTION_BY_ID,
+      [id]
+    );
+
+    if (!promotion[0]) {
+      return handleServerError({
+        res,
+        message: 'Promocion no encontrada',
+        errorNumber: 404,
+      });
+    }
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    await connection.query<DbQueryResult<Promotion[]>>(
+      QueryConstants.DELETE_DAYS,
+      [id]
+    );
+
+    await connection.query<DbQueryResult<Promotion[]>>(
+      QueryConstants.DELETE_PRODUCTS,
+      [id]
+    );
+
+    await connection.query<DbQueryResult<Promotion[]>>(
+      QueryConstants.DELETE_PROMOTION,
+      [id]
+    );
+    await connection.commit();
+
+    return res
+      .status(200)
+      .json({ message: 'Promocion eliminada exitosamente' });
+  } catch (error) {
+    if (connection) await connection.rollback();
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al eliminar la promocion',
+      errorNumber: 500,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.release();
+      } catch (releaseError) {
+        console.error('Error al liberar la conexión:', releaseError);
+      }
+    }
   }
 };

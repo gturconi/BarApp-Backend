@@ -6,6 +6,7 @@ import {
   getPromotion,
   insertPromotion,
   updatePromotion,
+  deletePromotion,
 } from '../promotion/controllers/promotion';
 
 import { isAdmin, verifyToken } from '../middlewares/authJwt';
@@ -31,5 +32,7 @@ router.put(
   validatorPromotion,
   updatePromotion
 );
+
+router.delete('/:id', [verifyToken, isAdmin], deletePromotion);
 
 export default router;

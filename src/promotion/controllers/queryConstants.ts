@@ -36,3 +36,10 @@ export const DELETE_PROMOTION_PRODUCTS =
 
 export const DELETE_PROMOTION_DAYS =
   'DELETE FROM promotionDays WHERE promotion_id = ? AND day_of_week = ?';
+
+export const DELETE_PROMOTION = 'DELETE FROM promotions WHERE id = ?';
+
+export const DELETE_DAYS = 'DELETE FROM promotionDays WHERE promotion_id = ?';
+
+export const DELETE_PRODUCTS =
+  'DELETE FROM products_promotions WHERE idProm = ?';
