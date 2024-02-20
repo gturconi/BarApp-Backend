@@ -12,8 +12,8 @@ const validatorTable: ((
   (req, res, next) => {
     try {
       req.body = {
-        number: req.body.number,
-        idState: req.body.state ? parseInt(req.body.state) : undefined,
+        number: req.body.number ? parseInt(req.body.number) : undefined,
+        idState: req.body.idState ? parseInt(req.body.idState) : undefined,
       };
 
       const isPutRequest = req.method === 'PUT';
