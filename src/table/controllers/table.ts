@@ -138,3 +138,32 @@ export const updateTable = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const deleteTable = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const [table] = await pool.query<DbQueryResult<Table[]>>(
+      QueryConstants.SELECT_TABLE_BY_ID,
+      [id]
+    );
+
+    if (!table[0]) {
+      return handleServerError({
+        res,
+        message: 'Mesa no encontrada',
+        errorNumber: 404,
+      });
+    }
+
+    await pool.query<DbQueryInsert>(QueryConstants.DELETE_TABLE, [id]);
+
+    return res.status(200).json({ message: 'Mesa eliminada exitosamente' });
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al eliminar la mesa',
+      errorNumber: 500,
+      error,
+    });
+  }
+};

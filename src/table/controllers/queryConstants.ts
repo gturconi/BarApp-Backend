@@ -14,3 +14,5 @@ export const INSERT_TABLE =
 
 export const UPDATE_TABLE =
   'UPDATE tables SET number = IFNULL(?, number), idState = IFNULL(?, idState) WHERE id = ?';
+
+export const DELETE_TABLE = 'DELETE FROM tables WHERE id = ?';
