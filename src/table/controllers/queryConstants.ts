@@ -11,3 +11,6 @@ export const SELECT_TABLE_BY_NUMBER =
 
 export const INSERT_TABLE =
   'INSERT INTO tables (number, idState) VALUES (?, ?)';
+
+export const UPDATE_TABLE =
+  'UPDATE tables SET number = IFNULL(?, number), idState = IFNULL(?, idState) WHERE id = ?';

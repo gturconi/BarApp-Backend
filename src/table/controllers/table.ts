@@ -109,3 +109,32 @@ export const insertTable = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const updateTable = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updateData = { ...req.body };
+
+    const updateTable = await pool.query<DbQueryInsert>(
+      QueryConstants.UPDATE_TABLE,
+      [updateData.number, updateData.idState, id]
+    );
+
+    if (updateTable[0].affectedRows <= 0) {
+      return res.status(200).json(updateTable);
+    }
+
+    const [newTableData] = await pool.query<DbQueryResult<Table[]>>(
+      QueryConstants.SELECT_TABLE_BY_ID,
+      [id]
+    );
+    res.send({ table: newTableData[0] });
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al actualizar la mesa',
+      errorNumber: 500,
+      error,
+    });
+  }
+};
