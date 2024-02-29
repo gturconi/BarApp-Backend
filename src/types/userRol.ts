@@ -7,6 +7,6 @@ export type UserRole = {
   email: string;
   password: string;
   roleId: number;
-  roleName: string;
+  role: string;
   baja: Baja;
 };

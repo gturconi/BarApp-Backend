@@ -90,7 +90,7 @@ export const updateUser = async (req: Request, res: Response) => {
         updateData.tel,
         updateData.email,
         updateData.password,
-        updateData.rol_id,
+        updateData.roleId,
         updateData.baja,
         resizedAvatar ? resizedAvatar : null,
         id,
@@ -181,7 +181,7 @@ export const deleteUser = async (req: Request, res: Response) => {
         errorNumber: 404,
       });
     }
-    await pool.query<DbQueryInsert>(QueryConstants.DELETE_USER, [id]);
+    await pool.query<DbQueryInsert>(QueryConstants.UPDATE_USER, [null,null,null,null,null,1, id]);
     return res.status(200).json({ message: "Usuario eliminado exitosamente" });
   } catch (error) {
     return handleServerError({
