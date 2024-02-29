@@ -5,7 +5,7 @@ export const SELECT_ROLE_BY_NAME = 'SELECT * FROM roles WHERE name = ?';
 export const SELECT_USER_BY_ID_NO_JOIN = 'SELECT * FROM users WHERE id = ?';
 
 export const SELECT_USER_BY_ID =
-  'SELECT u.id, u.name, u.tel, u.email, r.name AS role, u.avatar, u.baja FROM users u INNER JOIN roles AS r ON u.rol_id = r.id WHERE u.id = ?';
+"SELECT u.id, u.name, u.tel, u.email, u.baja, u.rol_id as roleId, r.name AS role FROM users u INNER JOIN roles AS r ON u.rol_id = r.id WHERE u.id = ?";
 
 export const GET_USER_PASSWORD = 'SELECT password FROM users WHERE id = ?';
 
@@ -21,4 +21,3 @@ export const SELECT_USERS =
 export const UPDATE_USER =
   'UPDATE users SET name = IFNULL(?, name), tel = IFNULL(?, tel), email = IFNULL(?, email), password = IFNULL(?, password) ,rol_id = IFNULL(?, rol_id), baja = IFNULL(?, baja) ,avatar = IFNULL(?, avatar) WHERE id = ?';
 
-export const DELETE_USER = 'DELETE FROM users WHERE id = ?';
