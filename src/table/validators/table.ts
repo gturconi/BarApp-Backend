@@ -11,11 +11,15 @@ const validatorTable: ((
 ) => void)[] = [
   (req, res, next) => {
     try {
+      console.log(req.body);
+
       req.body = {
         number: req.body.number ? parseInt(req.body.number) : undefined,
-        idState: req.body.idState ? parseInt(req.body.idState) : undefined,
+        idState:
+          req.body.idState !== null && req.body.idState !== undefined
+            ? parseInt(req.body.idState)
+            : undefined,
       };
-
       const isPutRequest = req.method === 'PUT';
 
       const numberValidation = z
