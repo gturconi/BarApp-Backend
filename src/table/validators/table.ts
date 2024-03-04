@@ -11,8 +11,6 @@ const validatorTable: ((
 ) => void)[] = [
   (req, res, next) => {
     try {
-      console.log(req.body);
-
       req.body = {
         number: req.body.number ? parseInt(req.body.number) : undefined,
         idState:
