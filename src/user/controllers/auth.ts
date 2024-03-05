@@ -6,8 +6,7 @@ import nodemailer from "nodemailer";
 import bcryptjs from "bcryptjs";
 
 import { User } from "../models/user";
-import { Role } from "../../role/models";
-import { ROLES } from "../../role/models";
+import { ROLES, Role } from "../../role/models/role";
 
 import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
 import { UserRole } from "../../types/userRol";
