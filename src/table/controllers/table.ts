@@ -167,3 +167,25 @@ export const deleteTable = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const updateState = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const idState = req.body.idState;
+
+    await pool.query<DbQueryInsert>(QueryConstants.UPDATE_TABLE, [
+      null,
+      idState,
+      id,
+    ]);
+
+    return res.status(200);
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al actualizar el estado de la mesa',
+      errorNumber: 500,
+      error,
+    });
+  }
+};

@@ -5,6 +5,7 @@ import {
   insertTable,
   updateTable,
   deleteTable,
+  updateState,
 } from '../table/controllers/table';
 
 import validatorTable from '../table/validators/table';
@@ -15,6 +16,7 @@ const router = express.Router();
 router.get('/', getTables);
 router.get('/:id', getTable);
 router.post('/', [verifyToken, isAdmin], validatorTable, insertTable);
+router.put('/state/:id', [verifyToken], validatorTable, updateState);
 router.put('/:id', [verifyToken, isAdmin], validatorTable, updateTable);
 router.delete('/:id', [verifyToken, isAdmin], deleteTable);
 
