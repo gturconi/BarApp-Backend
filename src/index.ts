@@ -17,6 +17,6 @@ app.listen(app.get('port'), () => {
 });
 
 //Iniciamos el servidor de websocket
-webSocketApp.listen(3000, () => {
+webSocketApp.listen(app2.get('server_port'), () => {
   console.log(`Server running on port ${app2.get('server_port')}`);
 });

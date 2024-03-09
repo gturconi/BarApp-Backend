@@ -7,7 +7,7 @@ export const webSocketApp = createServer(app2);
 
 const io = new Server(webSocketApp, {
   cors: {
-    origin: 'http://localhost:4200',
+    origin: `http://${process.env.FRONT_HOST}`,
     credentials: true,
   },
 });
@@ -20,7 +20,8 @@ io.on('connection', async (socket) => {
   });
 
   socket.on('order', async (msg) => {
-    console.log('evento order');
+    console.log('orders');
+    socket.emit('newOrder');
   });
 });
 
