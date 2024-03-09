@@ -13,8 +13,8 @@ import { isAdmin, verifyToken } from '../middlewares/authJwt';
 
 const router = express.Router();
 
-router.get('/', getTables);
-router.get('/:id', getTable);
+router.get('/', [verifyToken], getTables);
+router.get('/:id', [verifyToken], getTable);
 router.post('/', [verifyToken, isAdmin], validatorTable, insertTable);
 router.put('/state/:id', [verifyToken], validatorTable, updateState);
 router.put('/:id', [verifyToken, isAdmin], validatorTable, updateTable);

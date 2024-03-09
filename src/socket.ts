@@ -21,7 +21,7 @@ io.on('connection', async (socket) => {
 
   socket.on('order', async (msg) => {
     console.log('orders');
-    socket.emit('newOrder');
+    io.emit('newOrder');
   });
 });
 
