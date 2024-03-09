@@ -1,6 +1,6 @@
 import app from './app';
 import app2 from './socket';
-import server from './socket';
+import { webSocketApp } from './socket';
 
 // Db connection
 import pool from './shared/db/conn';
@@ -17,6 +17,6 @@ app.listen(app.get('port'), () => {
 });
 
 //Iniciamos el servidor de websocket
-server.listen(app2.get('server_port'), () => {
+webSocketApp.listen(3000, () => {
   console.log(`Server running on port ${app2.get('server_port')}`);
 });
