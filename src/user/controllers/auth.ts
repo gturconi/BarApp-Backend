@@ -1,21 +1,20 @@
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import { Request, Response } from "express";
-import pool from "../../shared/db/conn";
-import nodemailer from "nodemailer";
-import bcryptjs from "bcryptjs";
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import { Request, Response } from 'express';
+import pool from '../../shared/db/conn';
+import nodemailer from 'nodemailer';
+import bcryptjs from 'bcryptjs';
 
-import { User } from "../models/user";
-import { Role } from "../../role/models";
-import { ROLES } from "../../role/models";
+import { User } from '../models/user';
+import { Role, ROLES } from '../../role/models/role';
 
-import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
-import { UserRole } from "../../types/userRol";
-import * as QueryConstants from "./queryConstants";
-import { handleServerError } from "../../shared/errorHandler";
+import { DbQueryInsert, DbQueryResult } from '../../shared/queryTypes';
+import { UserRole } from '../../types/userRol';
+import * as QueryConstants from './queryConstants';
+import { handleServerError } from '../../shared/errorHandler';
 
 dotenv.config();
-const secret = process.env.SECRET || "";
+const secret = process.env.SECRET || '';
 
 type TransportOptions = {
   host?: string;
@@ -32,7 +31,7 @@ export const signupHandler = async (req: Request, res: Response) => {
     if (!req.body || !req.body.role) {
       return handleServerError({
         res,
-        message: "No se proporcionaron roles",
+        message: 'No se proporcionaron roles',
         errorNumber: 400,
       });
     }
@@ -55,7 +54,7 @@ export const signupHandler = async (req: Request, res: Response) => {
     if (existingUsers.length > 0) {
       return handleServerError({
         res,
-        message: "El usuario ya existe",
+        message: 'El usuario ya existe',
         errorNumber: 409,
       });
     }
@@ -72,7 +71,7 @@ export const signupHandler = async (req: Request, res: Response) => {
     } else {
       const [rows] = await pool.query<DbQueryResult<Role[]>>(
         QueryConstants.SELECT_ROLE_BY_NAME,
-        "employee"
+        'employee'
       );
       newUser.role = rows[0].id;
     }
@@ -96,7 +95,7 @@ export const signupHandler = async (req: Request, res: Response) => {
   } catch (error) {
     return handleServerError({
       res,
-      message: "Ocurrio un error al registrar el usuario",
+      message: 'Ocurrio un error al registrar el usuario',
       errorNumber: 500,
     });
   }
@@ -112,7 +111,7 @@ export const signinHandler = async (req: Request, res: Response) => {
     if (rows.length === 0) {
       return handleServerError({
         res,
-        message: "Usuario no encontrado",
+        message: 'Usuario no encontrado',
         errorNumber: 404,
       });
     }
@@ -122,7 +121,7 @@ export const signinHandler = async (req: Request, res: Response) => {
     if (userFound.baja) {
       return handleServerError({
         res,
-        message: "El usuario no se encuentra habilitado",
+        message: 'El usuario no se encuentra habilitado',
         errorNumber: 404,
       });
     }
@@ -135,7 +134,7 @@ export const signinHandler = async (req: Request, res: Response) => {
     if (!matchPassword)
       return handleServerError({
         res,
-        message: "Contraseña incorrecta",
+        message: 'Contraseña incorrecta',
         errorNumber: 401,
         token: null,
       });
@@ -146,7 +145,7 @@ export const signinHandler = async (req: Request, res: Response) => {
   } catch (error) {
     return handleServerError({
       res,
-      message: "Ocurrio un error al iniciar sesión",
+      message: 'Ocurrio un error al iniciar sesión',
       errorNumber: 500,
     });
   }
@@ -162,7 +161,7 @@ export const recoverPasswordHandler = async (req: Request, res: Response) => {
     if (rows.length === 0) {
       return handleServerError({
         res,
-        message: "Usuario no encontrado",
+        message: 'Usuario no encontrado',
         errorNumber: 404,
       });
     }
@@ -173,12 +172,12 @@ export const recoverPasswordHandler = async (req: Request, res: Response) => {
 
     await sendEmail(userFound, token);
     return res.status(200).json({
-      message: "Se ha enviado un correo para recuperar la contraseña",
+      message: 'Se ha enviado un correo para recuperar la contraseña',
     });
   } catch (error) {
     return handleServerError({
       res,
-      message: "Ocurrio un error al recuperar la contraseña",
+      message: 'Ocurrio un error al recuperar la contraseña',
       errorNumber: 500,
     });
   }
@@ -197,9 +196,9 @@ const sendEmail: (user: UserRole, token: string) => Promise<void> = async (
   const resetPasswordUrl = `http://${process.env.FRONT_HOST}/auth/new-password/${token}`;
 
   const mailOptions = {
-    from: "Forgot Password <no-reply@example.com>",
+    from: 'Forgot Password <no-reply@example.com>',
     to: user.email,
-    subject: "Recuperación de contraseña",
+    subject: 'Recuperación de contraseña',
     text: `
       Hola,
   
@@ -234,9 +233,9 @@ export const resetPassword = async (req: Request, res: Response) => {
   const { password } = req.body;
   const newPassword = await bcryptjs.hash(password, 10);
 
-  let token = req.headers["x-access-token"] as string;
+  let token = req.headers['x-access-token'] as string;
   const decoded = jwt.verify(token, secret);
-  if (typeof decoded === "object" && "id" in decoded) {
+  if (typeof decoded === 'object' && 'id' in decoded) {
     req.userId = decoded.id;
   }
 
@@ -248,7 +247,7 @@ export const resetPassword = async (req: Request, res: Response) => {
   if (!user[0]) {
     return handleServerError({
       res,
-      message: "Usuario no encontrado",
+      message: 'Usuario no encontrado',
       errorNumber: 404,
     });
   }
@@ -263,6 +262,6 @@ export const resetPassword = async (req: Request, res: Response) => {
   ]);
 
   return res.status(200).json({
-    message: "La contraseña se actualizo correctamente",
+    message: 'La contraseña se actualizo correctamente',
   });
 };
