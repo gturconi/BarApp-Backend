@@ -88,7 +88,7 @@ export const isAdmin = async (
       QueryConstants.SELECT_USER_BY_ID,
       [req.userId]
     );
-    if (rows && rows[0].roleName === 'admin') {
+    if (rows && rows[0].role === 'admin') {
       next();
       return;
     }
@@ -111,7 +111,7 @@ export const isEmployee = async (
       [req.userId]
     );
 
-    if (rows && rows[0].roleName === 'employee') {
+    if (rows && rows[0].role === 'employee') {
       next();
       return;
     }

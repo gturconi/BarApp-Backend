@@ -1,14 +1,14 @@
-import { Request, Response } from "express";
-import bcryptjs from "bcryptjs";
-import sharp from "sharp";
+import { Request, Response } from 'express';
+import bcryptjs from 'bcryptjs';
+import sharp from 'sharp';
 
-import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
-import pool from "../../shared/db/conn";
-import * as QueryConstants from "./queryConstants";
-import { handleServerError } from "../../shared/errorHandler";
+import { DbQueryInsert, DbQueryResult } from '../../shared/queryTypes';
+import pool from '../../shared/db/conn';
+import * as QueryConstants from './queryConstants';
+import { handleServerError } from '../../shared/errorHandler';
 
-import { EntityListResponse } from "../../shared/models/entity.list.response.model";
-import { User } from "../models/user";
+import { EntityListResponse } from '../../shared/models/entity.list.response.model';
+import { User } from '../models/user';
 export const getUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -20,7 +20,7 @@ export const getUser = async (req: Request, res: Response) => {
     if (rows.length <= 0) {
       return handleServerError({
         res,
-        message: "Usuario no encontrado",
+        message: 'Usuario no encontrado',
         errorNumber: 404,
       });
     }
@@ -28,7 +28,7 @@ export const getUser = async (req: Request, res: Response) => {
   } catch (error) {
     return handleServerError({
       res,
-      message: "Ocurrio un error al obtener el usuario",
+      message: 'Ocurrio un error al obtener el usuario',
       errorNumber: 500,
     });
   }
@@ -38,7 +38,7 @@ export const getUsers = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const perPage = parseInt(req.query.limit as string) || 10;
 
-  const search = (req.query.search as string) || "";
+  const search = (req.query.search as string) || '';
 
   try {
     const [totalRows] = await pool.query<DbQueryResult<any[]>>(
@@ -61,7 +61,7 @@ export const getUsers = async (req: Request, res: Response) => {
   } catch (error) {
     return handleServerError({
       res,
-      message: "Ocurrio un error al obtener la lista de usuarios",
+      message: 'Ocurrio un error al obtener la lista de usuarios',
       errorNumber: 500,
     });
   }
@@ -90,7 +90,7 @@ export const updateUser = async (req: Request, res: Response) => {
         updateData.tel,
         updateData.email,
         updateData.password,
-        updateData.rol_id,
+        updateData.roleId,
         updateData.baja,
         resizedAvatar ? resizedAvatar : null,
         id,
@@ -106,13 +106,13 @@ export const updateUser = async (req: Request, res: Response) => {
       [id]
     );
 
-    newUser[0].password = "";
+    newUser[0].password = '';
 
     res.send(newUser[0]);
   } catch (error) {
     return handleServerError({
       res,
-      message: "Ocurrio un error al actualizar el usuario",
+      message: 'Ocurrio un error al actualizar el usuario',
       errorNumber: 500,
       error,
     });
@@ -133,7 +133,7 @@ export const changePasswords = async (req: Request, res: Response) => {
     if (!user[0]) {
       return handleServerError({
         res,
-        message: "Usuario no encontrado",
+        message: 'Usuario no encontrado',
         errorNumber: 404,
       });
     }
@@ -141,7 +141,7 @@ export const changePasswords = async (req: Request, res: Response) => {
     if (!User.comparePasswords(password, user[0].password)) {
       return handleServerError({
         res,
-        message: "Contraseña incorrecta",
+        message: 'Contraseña incorrecta',
         errorNumber: 401,
       });
     }
@@ -157,11 +157,11 @@ export const changePasswords = async (req: Request, res: Response) => {
       id,
     ]);
 
-    return res.status(200).json({ message: "Contraseña actualizada" });
+    return res.status(200).json({ message: 'Contraseña actualizada' });
   } catch (error) {
     return handleServerError({
       res,
-      message: "Ocurrio un error al cambiar la contraseña",
+      message: 'Ocurrio un error al cambiar la contraseña',
       errorNumber: 500,
     });
   }
@@ -177,16 +177,16 @@ export const deleteUser = async (req: Request, res: Response) => {
     if (!newUser[0]) {
       return handleServerError({
         res,
-        message: "Usuario no encontrado",
+        message: 'Usuario no encontrado',
         errorNumber: 404,
       });
     }
     await pool.query<DbQueryInsert>(QueryConstants.DELETE_USER, [id]);
-    return res.status(200).json({ message: "Usuario eliminado exitosamente" });
+    return res.status(200).json({ message: 'Usuario eliminado exitosamente' });
   } catch (error) {
     return handleServerError({
       res,
-      message: "Ocurrio un error al eliminar el usuario",
+      message: 'Ocurrio un error al eliminar el usuario',
       errorNumber: 500,
       error,
     });

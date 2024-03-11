@@ -19,6 +19,7 @@ const validatorUser: ((
         password: req.body.password,
         newPassword: req.body.newPassword,
         role: req.body.role,
+        roleId: req.body.roleId ? parseInt(req.body.roleId) : undefined,
         tel: req.body.tel,
         baja: req.body.baja ? parseFloat(req.body.baja) : undefined,
         avatar: req.file,
@@ -75,6 +76,10 @@ const validatorUser: ((
           message: 'El campo nombre debe contener solo letras',
         })
         .min(1, { message: 'El campo rol no puede estar vacío' });
+
+      const roleIdValidation = z.number({
+        invalid_type_error: 'El campo rolId debe ser un número',
+      });
 
       const baja = z
         .number({
