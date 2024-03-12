@@ -9,13 +9,17 @@ import {
   changePasswords,
 } from '../user/controllers/user';
 import validatorUser from '../user/validators/user';
-import { isAdmin, verifyToken } from '../middlewares/authJwt';
+import {
+  isAdmin,
+  validateUserOrAdmin,
+  verifyToken,
+} from '../middlewares/authJwt';
 
 const upload = multer();
 const router = express.Router();
 
 router.get('/', [verifyToken, isAdmin], getUsers);
-router.get('/:id', verifyToken, getUser);
+router.get('/:id', [verifyToken, validateUserOrAdmin], getUser);
 router.put(
   '/:id',
   [verifyToken, isAdmin],

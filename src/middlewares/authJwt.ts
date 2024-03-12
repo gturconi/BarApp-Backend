@@ -120,3 +120,38 @@ export const isEmployee = async (
     return res.status(500).send({ message: 'Ocurrió un error' });
   }
 };
+
+export const validateUserOrAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userIdFromToken = req.userId;
+
+    if (!userIdFromToken) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+
+    const requestedUserId = req.params.id;
+
+    if (userIdFromToken == requestedUserId) {
+      next();
+      return;
+    }
+
+    const [rows] = await pool.query<DbQueryResult<UserRole[]>>(
+      QueryConstants.SELECT_USER_BY_ID,
+      [userIdFromToken]
+    );
+
+    if (rows && rows[0].role === 'admin') {
+      next();
+      return;
+    }
+
+    return res.status(403).json({ message: 'No autorizado' });
+  } catch (error) {
+    return res.status(500).send({ message: 'Ocurrió un error' });
+  }
+};
