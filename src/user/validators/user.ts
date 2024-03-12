@@ -113,6 +113,7 @@ const validatorUser: ((
         password: isPutRequest ? passValidation.optional() : passValidation,
         newPassword: passValidation.optional(),
         role: roleValidation.optional(),
+        roleId: roleIdValidation.optional(),
         tel: optional ? telValidation.optional() : telValidation,
         baja: baja.optional(),
         avatar: avatarValidation.optional(),
