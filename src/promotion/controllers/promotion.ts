@@ -4,12 +4,19 @@ import sharp from 'sharp';
 import { DbQueryInsert, DbQueryResult } from '../../shared/queryTypes';
 import pool from '../../shared/db/conn';
 import * as QueryConstants from './queryConstants';
+import * as ProductQueryConstants from '../../product/controllers/queryConstants';
 
 import { handleServerError } from '../../shared/errorHandler';
 
 import { EntityListResponse } from '../../shared/models/entity.list.response.model';
 import { Promotion } from '../models/promotion';
 import { FieldPacket, PoolConnection, ResultSetHeader } from 'mysql2/promise';
+import {
+  checkOverlappingPromotionsDates,
+  checkOverlappingPromotionsDatesAndDays,
+  checkOverlappingPromotionsDays,
+} from '../../utils/checkOverlappingPromotions';
+import { Product } from '../../product/models/product';
 
 export const getPromotions = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
@@ -82,6 +89,68 @@ export const insertPromotion = async (req: Request, res: Response) => {
       products,
       days_of_week,
     } = req.body;
+
+    const strDays_of_week = days_of_week.join(',');
+
+    for (const product of products) {
+      const [productsFounded] = await pool.query<DbQueryResult<Product[]>>(
+        ProductQueryConstants.SELECT_PRODUCT_BY_ID,
+        [product]
+      );
+      if (productsFounded.length <= 0) {
+        return handleServerError({
+          res,
+          message: `El producto con id ${product} no existe`,
+          errorNumber: 400,
+        });
+      }
+    }
+
+    if (price === undefined) {
+      for (const product of products) {
+        if (days_of_week === undefined) {
+          const overlappingPromotion = await checkOverlappingPromotionsDates(
+            product,
+            valid_from,
+            valid_to
+          );
+          if (overlappingPromotion) {
+            return handleServerError({
+              res,
+              message: `El producto ${product} ya tiene una promoción vigente en las fechas especificadas`,
+              errorNumber: 400,
+            });
+          }
+        } else if (valid_from === undefined) {
+          const overlappingPromotion = await checkOverlappingPromotionsDays(
+            product,
+            strDays_of_week
+          );
+          if (overlappingPromotion) {
+            return handleServerError({
+              res,
+              message: `El producto ${product} ya tiene una promoción vigente en los dias especificados`,
+              errorNumber: 400,
+            });
+          }
+        } else {
+          const overlappingPromotion =
+            await checkOverlappingPromotionsDatesAndDays(
+              product,
+              valid_from,
+              valid_to,
+              strDays_of_week
+            );
+          if (overlappingPromotion) {
+            return handleServerError({
+              res,
+              message: `El producto ${product} ya tiene una promoción vigente en las fechas y/o dias especificados`,
+              errorNumber: 400,
+            });
+          }
+        }
+      }
+    }
 
     if (image) resizedImage = await sharp(image.buffer).resize(400).toBuffer();
 
