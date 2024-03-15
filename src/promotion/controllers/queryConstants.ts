@@ -51,7 +51,16 @@ export const CHECK_OVERLAPPING_PROMOTIONS_DATES =
   'SELECT * FROM promotions p INNER JOIN products_promotions pp on pp.idProm=p.id WHERE pp.idProd = ? AND NOT(p.valid_from > ? OR p.valid_to < ?) AND p.baja = 0 AND p.price IS NULL';
 
 export const CHECK_OVERLAPPING_PROMOTIONS_DAYS =
-  'SELECT * FROM promotions p INNER JOIN products_promotions pp on pp.idProm=p.id INNER JOIN promotionDays pd on pd.promotion_id=p.id WHERE pp.idProd = ? AND pd.day_of_week IN (?) AND p.baja = 0 AND p.price IS NULL';
+  'SELECT * FROM promotions p INNER JOIN products_promotions pp on pp.idProm=p.id INNER JOIN promotionDays pd on pd.promotion_id=p.id WHERE pp.idProd = ? AND FIND_IN_SET(pd.day_of_week, ?) > 0 AND p.baja = 0 AND p.price IS NULL AND (p.valid_to IS NULL OR p.valid_to >= NOW())';
 
 export const CHECK_OVERLAPPING_PROMOTIONS_DATES_AND_DAYS =
-  'SELECT * FROM promotions p INNER JOIN products_promotions pp ON pp.idProm=p.id INNER JOIN promotionDays pd on pd.promotion_id=p.id WHERE pp.idProd = ? AND p.baja = 0 AND NOT(p.valid_from > ? OR p.valid_to < ?) AND pd.day_of_week IN (?) AND p.price IS NULL';
+  'SELECT * FROM promotions p INNER JOIN products_promotions pp ON pp.idProm=p.id INNER JOIN promotionDays pd on pd.promotion_id=p.id WHERE pp.idProd = ? AND p.baja = 0 AND NOT(p.valid_from > ? OR p.valid_to < ?) AND FIND_IN_SET(pd.day_of_week, ?) > 0 AND p.price IS NULL AND (p.valid_to IS NULL OR p.valid_to >= NOW())';
+
+export const CHECK_OVERLAPPING_PROMOTIONS_DATES_UPDATE =
+  'SELECT * FROM promotions p INNER JOIN products_promotions pp on pp.idProm=p.id WHERE pp.idProd = ? AND p.baja = 0 AND p.id <> ? AND p.price IS NULL AND ((? IS NOT NULL AND ? IS NOT NULL AND NOT(p.valid_from > ? OR p.valid_to < ?)) OR (? IS NOT NULL AND ? IS NULL AND NOT(p.valid_from > ?)) OR (? IS NULL AND ? IS NOT NULL AND NOT(p.valid_to < ?)))';
+
+export const CHECK_OVERLAPPING_PROMOTIONS_DAYS_UPDATE =
+  'SELECT * FROM promotions p INNER JOIN products_promotions pp on pp.idProm=p.id INNER JOIN promotionDays pd on pd.promotion_id=p.id WHERE pp.idProd = ? AND FIND_IN_SET(pd.day_of_week, ?) > 0 AND p.baja = 0 AND p.price IS NULL AND p.id <> ?';
+
+export const CHECK_OVERLAPPING_PROMOTIONS_DATES_AND_DAYS_UPDATE =
+  'SELECT * FROM promotions p INNER JOIN products_promotions pp ON pp.idProm=p.id INNER JOIN promotionDays pd on pd.promotion_id=p.id WHERE pp.idProd = ? AND p.baja = 0 AND p.id <> ? AND FIND_IN_SET(pd.day_of_week, ?) > 0 AND p.price IS NULL AND ((? IS NOT NULL AND ? IS NOT NULL AND NOT(p.valid_from > ? OR p.valid_to < ?)) OR (? IS NOT NULL AND ? IS NULL AND NOT(p.valid_from > ?)) OR (? IS NULL AND ? IS NOT NULL AND NOT(p.valid_to < ?)))';

@@ -90,7 +90,7 @@ export const insertPromotion = async (req: Request, res: Response) => {
       days_of_week,
     } = req.body;
 
-    const strDays_of_week = days_of_week.join(',');
+    const strDays_of_week = days_of_week ? days_of_week.join(',') : '';
 
     for (const product of products) {
       const [productsFounded] = await pool.query<DbQueryResult<Product[]>>(
@@ -112,7 +112,8 @@ export const insertPromotion = async (req: Request, res: Response) => {
           const overlappingPromotion = await checkOverlappingPromotionsDates(
             product,
             valid_from,
-            valid_to
+            valid_to,
+            false
           );
           if (overlappingPromotion) {
             return handleServerError({
@@ -124,7 +125,8 @@ export const insertPromotion = async (req: Request, res: Response) => {
         } else if (valid_from === undefined) {
           const overlappingPromotion = await checkOverlappingPromotionsDays(
             product,
-            strDays_of_week
+            strDays_of_week,
+            false
           );
           if (overlappingPromotion) {
             return handleServerError({
@@ -139,7 +141,8 @@ export const insertPromotion = async (req: Request, res: Response) => {
               product,
               valid_from,
               valid_to,
-              strDays_of_week
+              strDays_of_week,
+              false
             );
           if (overlappingPromotion) {
             return handleServerError({
@@ -245,6 +248,135 @@ export const updatePromotion = async (req: Request, res: Response) => {
     if (newImage) {
       resizedImage = Buffer.from([]);
       resizedImage = await sharp(newImage.buffer).resize(400).toBuffer();
+    }
+
+    if (updateData.products != undefined) {
+      for (const product of updateData.products) {
+        const [productsFounded] = await pool.query<DbQueryResult<Product[]>>(
+          ProductQueryConstants.SELECT_PRODUCT_BY_ID,
+          [product]
+        );
+        if (productsFounded.length <= 0) {
+          return handleServerError({
+            res,
+            message: `El producto con id ${product} no existe`,
+            errorNumber: 400,
+          });
+        }
+      }
+    }
+
+    if (
+      updateData.price == undefined &&
+      updateData.products == undefined &&
+      (updateData.valid_from || updateData.valid_to || updateData.days_of_week)
+    ) {
+      return handleServerError({
+        res,
+        message:
+          'Se requiere especificar los productos para actualizar las fechas y/o dias de la promocion',
+        errorNumber: 400,
+      });
+    }
+
+    const strDays_of_week = updateData.days_of_week
+      ? updateData.days_of_week.join(',')
+      : '';
+
+    const [promotionFounded] = await pool.query<DbQueryResult<Promotion[]>>(
+      QueryConstants.SELECT_PROMOTION_BY_ID,
+      [id]
+    );
+
+    if (promotionFounded.length <= 0) {
+      return handleServerError({
+        res,
+        message: 'Promocion no encontrada',
+        errorNumber: 404,
+      });
+    }
+
+    if (
+      updateData.price === undefined &&
+      promotionFounded[0].price == null &&
+      (updateData.valid_from || updateData.valid_to || updateData.days_of_week)
+    ) {
+      for (const product of updateData.products) {
+        if (updateData.days_of_week === undefined) {
+          if (promotionFounded[0].days_of_week == null) {
+            const overlappingPromotion = await checkOverlappingPromotionsDates(
+              product,
+              updateData.valid_from,
+              updateData.valid_to,
+              true,
+              id
+            );
+            if (overlappingPromotion) {
+              return handleServerError({
+                res,
+                message: `El producto ${product} ya tiene una promoción vigente en las fechas especificadas`,
+                errorNumber: 400,
+              });
+            }
+          } else {
+            const overlappingPromotion =
+              await checkOverlappingPromotionsDatesAndDays(
+                product,
+                updateData.valid_from,
+                updateData.valid_to,
+                promotionFounded[0].days_of_week.join(','),
+                true,
+                id
+              );
+            if (overlappingPromotion) {
+              return handleServerError({
+                res,
+                message: `El producto ${product} ya tiene una promoción vigente en las fechas y/o dias especificados`,
+                errorNumber: 400,
+              });
+            }
+          }
+        } else if (
+          updateData.valid_from === undefined &&
+          updateData.valid_to === undefined &&
+          promotionFounded[0].valid_from == null
+        ) {
+          const overlappingPromotion = await checkOverlappingPromotionsDays(
+            product,
+            strDays_of_week,
+            true,
+            id
+          );
+          if (overlappingPromotion) {
+            return handleServerError({
+              res,
+              message: `El producto ${product} ya tiene una promoción vigente en los dias especificados`,
+              errorNumber: 400,
+            });
+          }
+        } else {
+          const overlappingPromotion =
+            await checkOverlappingPromotionsDatesAndDays(
+              product,
+              updateData.valid_from != undefined
+                ? updateData.valid_from
+                : promotionFounded[0].valid_from,
+              updateData.valid_to != undefined
+                ? updateData.valid_to
+                : promotionFounded[0].valid_to,
+              strDays_of_week,
+              true,
+              id
+            );
+          if (overlappingPromotion) {
+            return handleServerError({
+              res,
+              message: `El producto ${product} ya tiene una promoción vigente en las fechas y/o dias especificados`,
+              errorNumber: 400,
+            });
+          }
+        }
+      }
     }
 
     connection = await pool.getConnection();
@@ -384,10 +516,9 @@ export const addProductsToPromotion = async (
   oldProducts: any[]
 ): Promise<void> => {
   const productsToAdd = newProducts.filter((newProduct: string) => {
-    return !oldProducts.some(
-      (oldProduct: any) => oldProduct.product_id === newProduct
-    );
+    return !oldProducts.some((oldProduct: any) => oldProduct.id == newProduct);
   });
+
   for (const product of productsToAdd) {
     await connection.query<DbQueryInsert>(
       QueryConstants.INSERT_PRODUCT_PROMOTION,
