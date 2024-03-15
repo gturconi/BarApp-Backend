@@ -14,7 +14,6 @@ import { Promotion } from '../../promotion/models/promotion';
 
 export const getProducts = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
-  const perPage = parseInt(req.query.limit as string) || 10;
 
   const search = (req.query.search as string) || '';
 
@@ -25,6 +24,8 @@ export const getProducts = async (req: Request, res: Response) => {
     );
 
     const totalProducts = totalRows[0].total;
+    const perPage = parseInt(req.query.limit as string) || totalProducts;
+
     const totalPages = Math.ceil(totalProducts / perPage);
     const startIndex = (page - 1) * perPage;
 
