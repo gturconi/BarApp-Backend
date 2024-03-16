@@ -23,7 +23,7 @@ export const INSERT_PROMOTION_DAYS =
   ' INSERT INTO promotionDays (promotion_id, day_of_week) VALUES (?, ?)';
 
 export const UPDATE_PROMOTION =
-  'UPDATE promotions p SET p.description = IFNULL(?, p.description), p.valid_from = IFNULL(?, p.valid_from), p.valid_to = IFNULL(?, p.valid_to), p.discount = IFNULL(?, p.discount), p.baja = IFNULL(?, p.baja), p.image = IFNULL(?, p.image), p.price = IFNULL(?, p.price) WHERE p.id = ?';
+  'UPDATE promotions p SET p.description = IFNULL(?, p.description), p.valid_from = IFNULL(?, NULL), p.valid_to = IFNULL(?, NULL), p.discount = IFNULL(?, NULL), p.baja = IFNULL(?, p.baja), p.image = IFNULL(?, p.image), p.price = IFNULL(?, NULL) WHERE p.id = ?';
 
 export const UPDATE_PROMOTION_PRODUCTS =
   'UPDATE products_promotions SET idProd = IFNULL(?, idProd) WHERE idProm = ?';
