@@ -1,21 +1,21 @@
-import { Request, Response } from 'express';
-import sharp from 'sharp';
+import { Request, Response } from "express";
+import sharp from "sharp";
 
-import { DbQueryInsert, DbQueryResult } from '../../shared/queryTypes';
-import pool from '../../shared/db/conn';
-import * as QueryConstants from './queryConstants';
-import * as PromQueryConstants from '../../promotion/controllers/queryConstants';
+import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
+import pool from "../../shared/db/conn";
+import * as QueryConstants from "./queryConstants";
+import * as PromQueryConstants from "../../promotion/controllers/queryConstants";
 
-import { handleServerError } from '../../shared/errorHandler';
+import { handleServerError } from "../../shared/errorHandler";
 
-import { EntityListResponse } from '../../shared/models/entity.list.response.model';
-import { Product } from '../models/product';
-import { Promotion } from '../../promotion/models/promotion';
+import { EntityListResponse } from "../../shared/models/entity.list.response.model";
+import { Product } from "../models/product";
+import { Promotion } from "../../promotion/models/promotion";
 
 export const getProducts = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
 
-  const search = (req.query.search as string) || '';
+  const search = (req.query.search as string) || "";
 
   try {
     const [totalRows] = await pool.query<DbQueryResult<any[]>>(
@@ -41,7 +41,7 @@ export const getProducts = async (req: Request, res: Response) => {
     console.log(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener la lista de Productos',
+      message: "Ocurrio un error al obtener la lista de Productos",
       errorNumber: 500,
     });
   }
@@ -58,7 +58,7 @@ export const getProduct = async (req: Request, res: Response) => {
     if (rows.length <= 0) {
       return handleServerError({
         res,
-        message: 'Producto no encontrado',
+        message: "Producto no encontrado",
         errorNumber: 404,
       });
     }
@@ -67,7 +67,7 @@ export const getProduct = async (req: Request, res: Response) => {
     console.log(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener el producto',
+      message: "Ocurrio un error al obtener el producto",
       errorNumber: 500,
     });
   }
@@ -89,7 +89,7 @@ export const insertProduct = async (req: Request, res: Response) => {
     if (existingProduct.length > 0) {
       return handleServerError({
         res,
-        message: 'El producto ya existe',
+        message: "El producto ya existe",
         errorNumber: 400,
       });
     }
@@ -136,7 +136,7 @@ export const insertProduct = async (req: Request, res: Response) => {
     if (connection) await connection.rollback();
     return handleServerError({
       res,
-      message: 'Ocurrio un error al insertar el producto',
+      message: "Ocurrio un error al insertar el producto",
       errorNumber: 500,
     });
   } finally {
@@ -169,10 +169,16 @@ export const updateProduct = async (req: Request, res: Response) => {
         updateData.idCat,
         updateData.baja,
         updateData.stock,
-        updateData.price,
+        null,
         id,
       ]
     );
+    if (updateData.price != undefined && updateData.price != null) {
+      await connection.query<DbQueryInsert>(QueryConstants.INSERT_PRICE, [
+        id,
+        updateData.price,
+      ]);
+    }
     await connection.commit();
 
     if (updateProduct[0].affectedRows <= 0) {
@@ -189,7 +195,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     if (connection) await connection.rollback();
     return handleServerError({
       res,
-      message: 'Ocurrio un error al actualizar el producto',
+      message: "Ocurrio un error al actualizar el producto",
       errorNumber: 500,
       error,
     });
@@ -210,7 +216,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
     if (!product[0]) {
       return handleServerError({
         res,
-        message: 'Producto no encontrado',
+        message: "Producto no encontrado",
         errorNumber: 404,
       });
     }
@@ -224,7 +230,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
       return handleServerError({
         res,
         message:
-          'No se puede eliminar el producto porque tiene promociones asociadas',
+          "No se puede eliminar el producto porque tiene promociones asociadas",
         errorNumber: 400,
       });
     }
@@ -241,12 +247,12 @@ export const deleteProduct = async (req: Request, res: Response) => {
     );
     await connection.commit();
 
-    return res.status(200).json({ message: 'Producto eliminado exitosamente' });
+    return res.status(200).json({ message: "Producto eliminado exitosamente" });
   } catch (error) {
     if (connection) await connection.rollback();
     return handleServerError({
       res,
-      message: 'Ocurrio un error al eliminar el producto',
+      message: "Ocurrio un error al eliminar el producto",
       errorNumber: 500,
       error,
     });
@@ -255,7 +261,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
       try {
         await connection.release();
       } catch (releaseError) {
-        console.error('Error al liberar la conexión:', releaseError);
+        console.error("Error al liberar la conexión:", releaseError);
       }
     }
   }

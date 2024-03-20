@@ -1,28 +1,28 @@
-import { Request, Response } from 'express';
-import sharp from 'sharp';
+import { Request, Response } from "express";
+import sharp from "sharp";
 
-import { DbQueryInsert, DbQueryResult } from '../../shared/queryTypes';
-import pool from '../../shared/db/conn';
-import * as QueryConstants from './queryConstants';
-import * as ProductQueryConstants from '../../product/controllers/queryConstants';
+import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
+import pool from "../../shared/db/conn";
+import * as QueryConstants from "./queryConstants";
+import * as ProductQueryConstants from "../../product/controllers/queryConstants";
 
-import { handleServerError } from '../../shared/errorHandler';
+import { handleServerError } from "../../shared/errorHandler";
 
-import { EntityListResponse } from '../../shared/models/entity.list.response.model';
-import { Promotion } from '../models/promotion';
-import { FieldPacket, PoolConnection, ResultSetHeader } from 'mysql2/promise';
+import { EntityListResponse } from "../../shared/models/entity.list.response.model";
+import { Promotion } from "../models/promotion";
+import { FieldPacket, PoolConnection, ResultSetHeader } from "mysql2/promise";
 import {
   checkOverlappingPromotionsDates,
   checkOverlappingPromotionsDatesAndDays,
   checkOverlappingPromotionsDays,
-} from '../../utils/checkOverlappingPromotions';
-import { Product } from '../../product/models/product';
+} from "../../utils/checkOverlappingPromotions";
+import { Product } from "../../product/models/product";
 
 export const getPromotions = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const perPage = parseInt(req.query.limit as string) || 10;
 
-  const search = (req.query.search as string) || '';
+  const search = (req.query.search as string) || "";
   try {
     const [totalRows] = await pool.query<DbQueryResult<any[]>>(
       QueryConstants.COUNT_PROMOTIONS,
@@ -44,7 +44,7 @@ export const getPromotions = async (req: Request, res: Response) => {
   } catch (error) {
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener la lista de promociones',
+      message: "Ocurrio un error al obtener la lista de promociones",
       errorNumber: 500,
     });
   }
@@ -61,7 +61,7 @@ export const getPromotion = async (req: Request, res: Response) => {
     if (rows.length <= 0) {
       return handleServerError({
         res,
-        message: 'Promocion no encontrada',
+        message: "Promocion no encontrada",
         errorNumber: 404,
       });
     }
@@ -69,7 +69,7 @@ export const getPromotion = async (req: Request, res: Response) => {
   } catch (error) {
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener la promocion',
+      message: "Ocurrio un error al obtener la promocion",
       errorNumber: 500,
     });
   }
@@ -87,10 +87,11 @@ export const insertPromotion = async (req: Request, res: Response) => {
       discount,
       price,
       products,
+      baja,
       days_of_week,
     } = req.body;
 
-    const strDays_of_week = days_of_week ? days_of_week.join(',') : '';
+    const strDays_of_week = days_of_week ? days_of_week.join(",") : "";
 
     for (const product of products) {
       const [productsFounded] = await pool.query<DbQueryResult<Product[]>>(
@@ -165,7 +166,7 @@ export const insertPromotion = async (req: Request, res: Response) => {
     if (existingPromotion.length > 0) {
       return handleServerError({
         res,
-        message: 'La promocion ya existe',
+        message: "La promocion ya existe",
         errorNumber: 400,
       });
     }
@@ -178,7 +179,8 @@ export const insertPromotion = async (req: Request, res: Response) => {
       valid_from,
       valid_to,
       discount,
-      days_of_week
+      days_of_week,
+      baja
     );
 
     connection = await pool.getConnection();
@@ -192,6 +194,7 @@ export const insertPromotion = async (req: Request, res: Response) => {
         newPromotion.discount,
         newPromotion.image,
         newPromotion.price,
+        newPromotion.baja,
       ]
     );
 
@@ -228,7 +231,7 @@ export const insertPromotion = async (req: Request, res: Response) => {
     if (connection) await connection.rollback();
     return handleServerError({
       res,
-      message: 'Ocurrio un error al insertar la promocion',
+      message: "Ocurrio un error al insertar la promocion",
       errorNumber: 500,
     });
   } finally {
@@ -274,14 +277,14 @@ export const updatePromotion = async (req: Request, res: Response) => {
       return handleServerError({
         res,
         message:
-          'Se requiere especificar los productos para actualizar las fechas y/o dias de la promocion',
+          "Se requiere especificar los productos para actualizar las fechas y/o dias de la promocion",
         errorNumber: 400,
       });
     }
 
     const strDays_of_week = updateData.days_of_week
-      ? updateData.days_of_week.join(',')
-      : '';
+      ? updateData.days_of_week.join(",")
+      : "";
 
     const [promotionFounded] = await pool.query<DbQueryResult<Promotion[]>>(
       QueryConstants.SELECT_PROMOTION_BY_ID,
@@ -291,7 +294,7 @@ export const updatePromotion = async (req: Request, res: Response) => {
     if (promotionFounded.length <= 0) {
       return handleServerError({
         res,
-        message: 'Promocion no encontrada',
+        message: "Promocion no encontrada",
         errorNumber: 404,
       });
     }
@@ -324,7 +327,7 @@ export const updatePromotion = async (req: Request, res: Response) => {
                 product,
                 updateData.valid_from,
                 updateData.valid_to,
-                promotionFounded[0].days_of_week.join(','),
+                promotionFounded[0].days_of_week.join(","),
                 true,
                 id
               );
@@ -387,7 +390,7 @@ export const updatePromotion = async (req: Request, res: Response) => {
     if (!oldPromotion) {
       return handleServerError({
         res,
-        message: 'Promocion no encontrada',
+        message: "Promocion no encontrada",
         errorNumber: 404,
       });
     }
@@ -401,7 +404,7 @@ export const updatePromotion = async (req: Request, res: Response) => {
     ) {
       return handleServerError({
         res,
-        message: 'La fecha de inicio no puede ser mayor a la fecha de fin',
+        message: "La fecha de inicio no puede ser mayor a la fecha de fin",
         errorNumber: 400,
       });
     } else if (
@@ -411,7 +414,7 @@ export const updatePromotion = async (req: Request, res: Response) => {
     ) {
       return handleServerError({
         res,
-        message: 'La fecha de fin no puede ser menor a la fecha de inicio',
+        message: "La fecha de fin no puede ser menor a la fecha de inicio",
         errorNumber: 400,
       });
     }
@@ -469,7 +472,7 @@ export const updatePromotion = async (req: Request, res: Response) => {
     if (connection) await connection.rollback();
     return handleServerError({
       res,
-      message: 'Ocurrio un error al insertar la promocion',
+      message: "Ocurrio un error al insertar la promocion",
       errorNumber: 500,
     });
   } finally {
@@ -607,7 +610,7 @@ export const deletePromotion = async (req: Request, res: Response) => {
     if (!promotion[0]) {
       return handleServerError({
         res,
-        message: 'Promocion no encontrada',
+        message: "Promocion no encontrada",
         errorNumber: 404,
       });
     }
@@ -633,12 +636,12 @@ export const deletePromotion = async (req: Request, res: Response) => {
 
     return res
       .status(200)
-      .json({ message: 'Promocion eliminada exitosamente' });
+      .json({ message: "Promocion eliminada exitosamente" });
   } catch (error) {
     if (connection) await connection.rollback();
     return handleServerError({
       res,
-      message: 'Ocurrio un error al eliminar la promocion',
+      message: "Ocurrio un error al eliminar la promocion",
       errorNumber: 500,
     });
   } finally {
@@ -646,7 +649,7 @@ export const deletePromotion = async (req: Request, res: Response) => {
       try {
         await connection.release();
       } catch (releaseError) {
-        console.error('Error al liberar la conexión:', releaseError);
+        console.error("Error al liberar la conexión:", releaseError);
       }
     }
   }
