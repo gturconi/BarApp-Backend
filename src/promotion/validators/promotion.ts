@@ -103,7 +103,7 @@ const validatorPromotion: ((
         .number({
           invalid_type_error: "El campo descuento debe ser un número",
         })
-        .refine((value) => value > 0 && value <= 1, {
+        .refine((value) => value >= 0 && value <= 1, {
           message: "El campo descuento debe ser un número flotante entre 0 y 1",
         });
 
