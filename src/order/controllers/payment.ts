@@ -1,31 +1,51 @@
 import { Request, Response } from 'express';
+import { DbQueryResult } from '../../shared/queryTypes';
+import { handleServerError } from '../../shared/errorHandler';
+import pool from '../../shared/db/conn';
+
 import mercadopago from 'mercadopago';
 import { PreferenceItem } from 'mercadopago/models/preferences/create-payload.model';
 import { PreferenceCreateResponse } from 'mercadopago/resources/preferences';
+
+import { OrderDetail } from '../models/orderDetail';
+import { User } from '../../user/models/user';
+
+import { getUser } from '../../user/controllers/user';
+import * as userConstants from '../../user/controllers/queryConstants';
 
 export const createOrder = async (req: Request, res: Response) => {
   mercadopago.configure({
     access_token: process.env.MERCADOPAGO_API_KEY as string,
   });
 
-  const array: PreferenceItem[] = [
-    {
-      id: '1',
-      title: 'Laptop',
-      unit_price: 500,
+  const {
+    tableId,
+    userId,
+    idState,
+    orderDetails,
+    date_created,
+    total,
+    feedback,
+    score,
+  } = req.body;
+
+  const array: PreferenceItem[] = [];
+  const details: OrderDetail[] = orderDetails;
+
+  details.forEach((detail) => {
+    array.push({
+      id: detail.id?.toString(),
+      unit_price: detail.unitPrice,
       currency_id: 'ARS',
-      quantity: 1,
-      description: 'Laptop',
-    },
-    {
-      id: '2',
-      title: 'Keyboard',
-      unit_price: 50,
-      currency_id: 'ARS',
-      quantity: 2,
-      description: 'Keyboard',
-    },
-  ];
+      quantity: detail.quantity,
+      description: detail.comments,
+    });
+  });
+
+  const [payer] = await pool.query<DbQueryResult<User[]>>(
+    userConstants.SELECT_USER_BY_ID,
+    [userId]
+  );
 
   try {
     const result: PreferenceCreateResponse =
@@ -35,9 +55,8 @@ export const createOrder = async (req: Request, res: Response) => {
           installments: 1,
         },
         payer: {
-          name: 'Gonzalo',
-          surname: 'Cevallos',
-          email: '5LqFP@example.com',
+          name: payer[0].name,
+          email: payer[0].email,
         },
 
         back_urls: {
@@ -59,17 +78,18 @@ export const receiveWebhook = async (req: Request, res: Response) => {
   try {
     const payment: any = req.query;
 
-    console.log(payment);
+    console.log('payment: ', payment);
     if (payment && typeof payment === 'object' && payment.type === 'payment') {
       const data = await mercadopago.payment.findById(
         payment['data.id'] as number
       );
-      console.log(data);
+      console.log('data: ', data);
       //guardar en DB info:
-      /*        
-        description, payment
+      /*   
+        order_id             
         date_created
-        payment_method
+        user_email        
+        payment_method_id
         order
         payer
         status

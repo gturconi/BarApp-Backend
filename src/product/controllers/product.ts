@@ -157,7 +157,6 @@ export const updateProduct = async (req: Request, res: Response) => {
       resizedImage = Buffer.from([]);
       resizedImage = await sharp(newImage.buffer).resize(400).toBuffer();
     }
-
     connection = await pool.getConnection();
     await connection.beginTransaction();
 

@@ -4,6 +4,7 @@ export class OrderDetail {
   public productId?: number;
   public promotionId?: number;
   public quantity?: number;
+  public unitPrice?: number;
   public comments?: string;
 
   constructor(
@@ -11,12 +12,14 @@ export class OrderDetail {
     productId?: number,
     promotionId?: number,
     quantity?: number,
+    unitPrice?: number,
     comments?: string
   ) {
     this.orderId = orderId;
     this.productId = productId;
     this.promotionId = promotionId;
     this.quantity = quantity;
+    this.unitPrice = unitPrice;
     this.comments = comments;
   }
 }
