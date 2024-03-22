@@ -160,6 +160,12 @@ export const updateProduct = async (req: Request, res: Response) => {
 
     connection = await pool.getConnection();
     await connection.beginTransaction();
+
+    const [existingProduct] = await pool.query<DbQueryResult<Product[]>>(
+      QueryConstants.SELECT_PRODUCT_BY_ID,
+      [id]
+    );
+
     const updateProduct = await connection.query<DbQueryInsert>(
       QueryConstants.UPDATE_PRODUCT,
       [
@@ -169,10 +175,20 @@ export const updateProduct = async (req: Request, res: Response) => {
         updateData.idCat,
         updateData.baja,
         updateData.stock,
-        updateData.price,
+        null,
         id,
       ]
     );
+    if (
+      updateData.price != undefined &&
+      updateData.price != null &&
+      existingProduct[0].price != updateData.price
+    ) {
+      await connection.query<DbQueryInsert>(QueryConstants.INSERT_PRICE, [
+        id,
+        updateData.price,
+      ]);
+    }
     await connection.commit();
 
     if (updateProduct[0].affectedRows <= 0) {
