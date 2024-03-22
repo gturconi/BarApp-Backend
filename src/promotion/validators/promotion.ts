@@ -94,7 +94,7 @@ const validatorPromotion: ((
         invalid_type_error: 'El campo valid_to debe ser una fecha válida',
       });
 
-      const priceValidation = z
+      const price = z
         .number({
           invalid_type_error: 'El campo precio debe ser un número',
         })
@@ -143,7 +143,7 @@ const validatorPromotion: ((
         valid_from: validFromDateValidation.optional(),
         valid_to: validToDateValidation.optional(),
         discount: discountValidation.optional(),
-        price: priceValidation.optional(),
+        price: price.optional(),
         days_of_week: days_of_weekValidation.optional(),
         products: isPutRequest
           ? productsValidation.optional()
