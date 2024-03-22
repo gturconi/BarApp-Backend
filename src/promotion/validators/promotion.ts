@@ -12,7 +12,6 @@ const validatorPromotion: ((
   next: NextFunction
 ) => void)[] = [
   (req, res, next) => {
-    console.log(req.body);
     try {
       req.body = {
         description: req.body.description,
@@ -23,7 +22,9 @@ const validatorPromotion: ((
         valid_to: req.body.valid_to ? new Date(req.body.valid_to) : undefined,
         discount: req.body.discount ? parseFloat(req.body.discount) : undefined,
         price:
-          req.body.price !== null && req.body.price !== undefined
+          req.body.price !== null &&
+          req.body.price !== undefined &&
+          req.body.price !== 'undefined'
             ? parseFloat(req.body.price)
             : undefined,
         products: req.body.products ? JSON.parse(req.body.products) : undefined,
@@ -35,7 +36,6 @@ const validatorPromotion: ((
             ? parseInt(req.body.baja)
             : undefined,
       };
-
       const isPutRequest = req.method === 'PUT';
 
       if (
@@ -94,7 +94,7 @@ const validatorPromotion: ((
         invalid_type_error: 'El campo valid_to debe ser una fecha válida',
       });
 
-      const price = z
+      const priceValidation = z
         .number({
           invalid_type_error: 'El campo precio debe ser un número',
         })
@@ -143,7 +143,7 @@ const validatorPromotion: ((
         valid_from: validFromDateValidation.optional(),
         valid_to: validToDateValidation.optional(),
         discount: discountValidation.optional(),
-        price: price.optional(),
+        price: priceValidation.optional(),
         days_of_week: days_of_weekValidation.optional(),
         products: isPutRequest
           ? productsValidation.optional()
