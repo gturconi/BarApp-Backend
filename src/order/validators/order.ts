@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { Request, Response, NextFunction } from 'express';
 import { customErrorMap } from '../../shared/utils/customErrorMap';
+import { orderSchema } from './orderSchema';
 
 z.setErrorMap(customErrorMap);
 
@@ -12,7 +13,7 @@ const validatorOrder: ((
   (req, res, next) => {
     try {
       req.body = {
-        userId: req.body.idClient ? parseInt(req.body.userId) : undefined,
+        userId: req.body.userId ? parseInt(req.body.userId) : undefined,
         employeeId: req.body.employeeId
           ? parseInt(req.body.employeeId)
           : undefined,
@@ -26,6 +27,20 @@ const validatorOrder: ((
         score: req.body.score ? parseInt(req.body.score) : undefined,
         orderDetails: req.body.orderDetails,
       };
+
+      const isPutRequest = req.method === 'PUT';
+
+      const schema = isPutRequest ? orderSchema.optional() : orderSchema;
+
+      const validatedData = schema.safeParse(req.body);
+
+      if (validatedData.success) {
+        next();
+      } else {
+        return res
+          .status(400)
+          .json({ message: validatedData.error.formErrors.fieldErrors });
+      }
     } catch (error) {
       return res.status(500).json(error);
     }
