@@ -1,9 +1,12 @@
+import { OrderDetail } from './orderDetail';
+
 export class Order {
   public id?: number;
   public tableId: number;
   public userId: number;
+  public employeeId?: number;
   public idState: number;
-  public orderDetails: number[];
+  public orderDetails: OrderDetail[];
   public date_created: Date;
   public total: number;
   public feedback?: string;
@@ -13,11 +16,12 @@ export class Order {
     tableId: number,
     userId: number,
     idState: number,
-    orderDetails?: number[],
+    orderDetails?: OrderDetail[],
     date_created?: Date,
     total?: number,
     feedback?: string,
-    score?: number
+    score?: number,
+    idEmployee?: number
   ) {
     this.tableId = tableId;
     this.userId = userId;
@@ -27,5 +31,6 @@ export class Order {
     this.total = total || 0;
     this.feedback = feedback;
     this.score = score;
+    this.employeeId = idEmployee;
   }
 }
