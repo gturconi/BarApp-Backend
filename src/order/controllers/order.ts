@@ -13,6 +13,7 @@ import { Order } from '../models/order';
 import { ROLES } from '../../role/models/role';
 
 import {
+  checkExistingOrderState,
   checkExistingProducts,
   checkExistingPromotions,
   checkExistingTables,
@@ -277,5 +278,56 @@ export const deleteOrder = async (req: Request, res: Response) => {
     });
   } finally {
     if (connection) await connection.release();
+  }
+};
+
+export const updateOrderState = async (req: Request, res: Response) => {
+  let connection = null;
+  try {
+    const { id } = req.params;
+    const { stateId } = req.body;
+
+    if (!(await checkExistingOrderState(stateId))) {
+      return handleServerError({
+        res,
+        message: 'El estado del pedido no existe',
+        errorNumber: 400,
+      });
+    }
+
+    const [orderFounded] = await pool.query<DbQueryResult<any[]>>(
+      OrderConstants.SELECT_ORDER_BY_ID,
+      [id]
+    );
+
+    if (orderFounded.length <= 0) {
+      return handleServerError({
+        res,
+        message: 'Pedido no encontrado',
+        errorNumber: 404,
+      });
+    }
+
+    if (orderFounded[0].state.description == 'Pagado') {
+      return handleServerError({
+        res,
+        message: 'No es posible cambiar el estado de un pedido ya pagado',
+        errorNumber: 400,
+      });
+    }
+
+    await pool.query<DbQueryResult<any[]>>(OrderConstants.UPDATE_ORDER_STATE, [
+      stateId,
+      id,
+    ]);
+
+    return res.status(200).json({ message: 'Estado del pedido actualizado' });
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al eliminar el pedido',
+      errorNumber: 500,
+      error,
+    });
   }
 };

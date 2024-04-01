@@ -27,3 +27,6 @@ export const CHECK_EXISTING_UNCONFIRMED_ORDER =
 
 export const CHECK_EXISTING_ORDER_IN_TABLE =
   'SELECT * FROM orders WHERE idState IN (1,2,3) AND tableId = ? AND userId = ?';
+
+export const CHECK_EXISTING_ORDER_STATE =
+  'SELECT * FROM orderState WHERE id = ?';

@@ -103,3 +103,16 @@ export const checkExistingUnconfirmedOrder = async (id: string) => {
     return error;
   }
 };
+
+export const checkExistingOrderState = async (id: string) => {
+  try {
+    const [existingOrders] = await pool.query<DbQueryResult<any[]>>(
+      OrderQueryConstants.CHECK_EXISTING_ORDER_STATE,
+      [id]
+    );
+
+    return existingOrders.length > 0 ? true : false;
+  } catch (error) {
+    return error;
+  }
+};
