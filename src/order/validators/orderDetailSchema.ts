@@ -10,7 +10,8 @@ export const orderDetailsSchema = z.object({
     })
     .positive({
       message: 'La orden debe ser un número positivo',
-    }),
+    })
+    .optional(),
   productId: z.number().positive().optional(),
   promotionId: z
     .number({

@@ -17,13 +17,19 @@ export const orderSchema = z.object({
     invalid_type_error: 'El campo tableId debe ser un número',
   }),
 
-  idState: z.number({
-    invalid_type_error: 'El campo idState debe ser un número',
-  }),
-
-  idPromotion: z.number({
-    invalid_type_error: 'El campo idPromotion debe ser un número',
-  }),
+  idState: z
+    .number({
+      invalid_type_error: 'El campo idState debe ser un número',
+    })
+    .int({
+      message: 'El campo idState debe ser un número entero',
+    })
+    .min(1, {
+      message: 'El campo idState solo puede asumir valores del 1 al 4',
+    })
+    .max(4, {
+      message: 'El campo idState solo puede asumir valores del 1 al 4',
+    }),
 
   total: z
     .number({

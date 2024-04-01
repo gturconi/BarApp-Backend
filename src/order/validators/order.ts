@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { Request, Response, NextFunction } from 'express';
 import { customErrorMap } from '../../shared/utils/customErrorMap';
 import { orderSchema } from './orderSchema';
+import { OrderDetail } from '../models/orderDetail';
 
 z.setErrorMap(customErrorMap);
 
@@ -19,9 +20,6 @@ const validatorOrder: ((
           : undefined,
         tableId: req.body.tableId ? parseInt(req.body.tableId) : undefined,
         idState: req.body.idState ? parseInt(req.body.idState) : undefined,
-        idPromotion: req.body.idPromotion
-          ? parseInt(req.body.idPromotion)
-          : undefined,
         total: req.body.total ? parseFloat(req.body.total) : undefined,
         feedback: req.body.feedback,
         score: req.body.score ? parseInt(req.body.score) : undefined,
@@ -29,6 +27,19 @@ const validatorOrder: ((
       };
 
       const isPutRequest = req.method === 'PUT';
+
+      req.body.orderDetails.map((od: OrderDetail) => {
+        if (
+          !isPutRequest &&
+          od.promotionId === undefined &&
+          od.productId === undefined
+        ) {
+          return res.status(400).json({
+            message:
+              'El detalle del pedido debe tener al menos un producto o promocion asociado',
+          });
+        }
+      });
 
       const schema = isPutRequest ? orderSchema.optional() : orderSchema;
 

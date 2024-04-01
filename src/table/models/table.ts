@@ -1,5 +1,5 @@
 import { TableState } from '../../types/tableState';
-
+export const TABLE_STATE = ['Free', 'Occupied'];
 export class Table {
   public id?: number;
   public number: number;

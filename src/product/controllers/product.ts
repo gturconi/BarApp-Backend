@@ -131,7 +131,7 @@ export const insertProduct = async (req: Request, res: Response) => {
       [insertedProductId]
     );
 
-    res.send({ product: ProductInserted[0] });
+    res.status(201).send({ product: ProductInserted[0] });
   } catch (error) {
     if (connection) await connection.rollback();
     return handleServerError({
