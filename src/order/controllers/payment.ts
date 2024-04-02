@@ -9,9 +9,12 @@ import { PreferenceCreateResponse } from 'mercadopago/resources/preferences';
 
 import { OrderDetail } from '../models/orderDetail';
 import { User } from '../../user/models/user';
+import { OrderState } from '../models/order';
 
 import { getUser } from '../../user/controllers/user';
 import * as userConstants from '../../user/controllers/queryConstants';
+import * as orderConstants from './queryConstants';
+import { PaymentGetResponse } from 'mercadopago/resources/payment';
 
 export const createOrder = async (req: Request, res: Response) => {
   mercadopago.configure({
@@ -29,8 +32,30 @@ export const createOrder = async (req: Request, res: Response) => {
     score,
   } = req.body;
 
+  const id = req.params.id;
   const array: PreferenceItem[] = [];
   const details: OrderDetail[] = orderDetails;
+
+  const [orderFounded] = await pool.query<DbQueryResult<any[]>>(
+    orderConstants.SELECT_ORDER_BY_ID,
+    [id]
+  );
+
+  if (orderFounded.length <= 0) {
+    return handleServerError({
+      res,
+      message: 'Pedido no encontrado',
+      errorNumber: 404,
+    });
+  }
+
+  if (orderFounded[0].state.description != 'Entregado') {
+    return handleServerError({
+      res,
+      message: 'Solo es posible pagar un pedido en estado Entregado',
+      errorNumber: 400,
+    });
+  }
 
   details.forEach((detail) => {
     array.push({
@@ -65,7 +90,7 @@ export const createOrder = async (req: Request, res: Response) => {
           failure: `${process.env.FRONT_HOST}/orders/my-orders`,
         },
         auto_return: 'approved',
-        notification_url: `${process.env.BACK_HOST}/api/payment/webhook`,
+        notification_url: `${process.env.BACK_HOST}/api/payment/webhook/${id}`,
       });
 
     res.json(result.body.init_point);
@@ -77,15 +102,32 @@ export const createOrder = async (req: Request, res: Response) => {
 export const receiveWebhook = async (req: Request, res: Response) => {
   try {
     const payment: any = req.query;
+    const { id } = req.params;
+    let connection = null;
 
     console.log('payment: ', payment);
     if (payment && typeof payment === 'object' && payment.type === 'payment') {
-      const data = await mercadopago.payment.findById(
+      const data: PaymentGetResponse = await mercadopago.payment.findById(
         payment['data.id'] as number
       );
-      console.log('data: ', data);
-      //guardar en DB info:
-      /*   
+
+      try {
+        connection = await pool.getConnection();
+
+        await connection.beginTransaction();
+
+        await pool.query<DbQueryResult<any[]>>(
+          orderConstants.UPDATE_ORDER_STATE,
+          [OrderState.Pagado, id]
+        );
+
+        /* await pool.query<DbQueryResult<any[]>>(orderConstants.SAVE_TICKET, [
+          data.body.order_id,
+          data.body.date_created,
+        ]);*/
+        console.log('data: ', data);
+        //guardar en DB info:
+        /*   
         order_id             
         date_created
         user_email        
@@ -95,6 +137,15 @@ export const receiveWebhook = async (req: Request, res: Response) => {
         status
         total_paid_amount
       */
+        await connection.commit();
+      } catch (error) {
+        return handleServerError({
+          res,
+          message: 'Ocurrio un error al procesar el pago',
+          errorNumber: 500,
+          error,
+        });
+      }
     }
 
     res.sendStatus(204);

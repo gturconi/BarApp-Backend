@@ -1,5 +1,12 @@
 import { OrderDetail } from './orderDetail';
 
+export const enum OrderState {
+  A_confirmar = 1,
+  En_preparación = 2,
+  Entregado = 3,
+  Pagado = 4,
+}
+
 export class Order {
   public id?: number;
   public tableId: number;

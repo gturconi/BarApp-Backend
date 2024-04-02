@@ -30,3 +30,6 @@ export const CHECK_EXISTING_ORDER_IN_TABLE =
 
 export const CHECK_EXISTING_ORDER_STATE =
   'SELECT * FROM orderState WHERE id = ?';
+
+export const SAVE_TICKET =
+  'INSERT INTO tickets (order_id, date_created, user_email, payment_method, status, total_paid_amount) VALUES (?, ?, ?, ?, ?, ?)';
