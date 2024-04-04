@@ -20,7 +20,7 @@ export const createOrder = async (req: Request, res: Response) => {
   mercadopago.configure({
     access_token: process.env.MERCADOPAGO_API_KEY as string,
   });
-
+  /*
   const {
     tableId,
     userId,
@@ -31,10 +31,10 @@ export const createOrder = async (req: Request, res: Response) => {
     feedback,
     score,
   } = req.body;
-
+*/
   const id = req.params.id;
   const array: PreferenceItem[] = [];
-  const details: OrderDetail[] = orderDetails;
+  let details!: OrderDetail[];
 
   const [orderFounded] = await pool.query<DbQueryResult<any[]>>(
     orderConstants.SELECT_ORDER_BY_ID,
@@ -57,19 +57,23 @@ export const createOrder = async (req: Request, res: Response) => {
     });
   }
 
+  details = orderFounded[0].orderDetails;
+
   details.forEach((detail) => {
     array.push({
-      id: detail.id?.toString(),
+      id: detail.productId
+        ? detail.productId.toString()
+        : detail.promotionId?.toString(),
       unit_price: detail.unitPrice,
       currency_id: 'ARS',
       quantity: detail.quantity,
-      description: detail.comments,
+      description: detail.comments ? detail.comments : '',
     });
   });
 
   const [payer] = await pool.query<DbQueryResult<User[]>>(
     userConstants.SELECT_USER_BY_ID,
-    [userId]
+    [orderFounded[0].user.id]
   );
 
   try {
@@ -95,7 +99,9 @@ export const createOrder = async (req: Request, res: Response) => {
 
     res.json(result.body.init_point);
   } catch (error) {
-    return res.status(500).json({ message: 'Something goes wrong' });
+    return res
+      .status(500)
+      .json({ message: 'Ocurrio un error al procesar el pago' });
   }
 };
 
@@ -105,9 +111,8 @@ export const receiveWebhook = async (req: Request, res: Response) => {
     const { id } = req.params;
     let connection = null;
 
-    console.log('payment: ', payment);
     if (payment && typeof payment === 'object' && payment.type === 'payment') {
-      const data: PaymentGetResponse = await mercadopago.payment.findById(
+      const data: any = await mercadopago.payment.findById(
         payment['data.id'] as number
       );
 
@@ -121,22 +126,19 @@ export const receiveWebhook = async (req: Request, res: Response) => {
           [OrderState.Pagado, id]
         );
 
-        /* await pool.query<DbQueryResult<any[]>>(orderConstants.SAVE_TICKET, [
-          data.body.order_id,
-          data.body.date_created,
-        ]);*/
-        console.log('data: ', data);
-        //guardar en DB info:
-        /*   
-        order_id             
-        date_created
-        user_email        
-        payment_method_id
-        order
-        payer
-        status
-        total_paid_amount
-      */
+        const { date_created, payer, payment_method_id, status } = data.body;
+
+        const { transaction_details } = data.response;
+
+        await pool.query<DbQueryResult<any[]>>(orderConstants.SAVE_TICKET, [
+          id,
+          date_created,
+          payer.email,
+          payment_method_id,
+          status,
+          transaction_details.total_paid_amount,
+        ]);
+
         await connection.commit();
       } catch (error) {
         return handleServerError({
@@ -150,7 +152,8 @@ export const receiveWebhook = async (req: Request, res: Response) => {
 
     res.sendStatus(204);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: 'Something goes wrong' });
+    return res
+      .status(500)
+      .json({ message: 'Ocurrio un error al procesar el pago' });
   }
 };

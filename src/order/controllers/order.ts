@@ -263,7 +263,7 @@ export const deleteOrder = async (req: Request, res: Response) => {
     await pool.query<DbQueryInsert>(TableQueryConstants.UPDATE_TABLE, [
       null,
       1,
-      existingOrders[0].state.id,
+      existingOrders[0].table_order.id,
     ]);
 
     await connection.commit();

@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { createOrder, receiveWebhook } from '../order/controllers/payment';
+import { verifyToken } from '../middlewares/authJwt';
+
 const router = Router();
 
-router.post(':id', createOrder);
+router.post('/:id', verifyToken, createOrder);
 
 router.post('/webhook/:id', receiveWebhook);
 

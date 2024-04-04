@@ -20,7 +20,12 @@ const router = express.Router();
 
 router.get('/', [verifyToken, isAdmin], getOrders);
 router.get('/:id', [verifyToken, validateUserOrAdmin], getOrder);
-router.post('/', validatorOrder, createOrder);
+router.post(
+  '/',
+  [verifyToken, validateUserOrAdmin],
+  validatorOrder,
+  createOrder
+);
 router.delete('/:id', [verifyToken, validateUserOrAdmin], deleteOrder);
 router.put('/:id', [verifyToken, isEmployee], updateOrderState);
 
