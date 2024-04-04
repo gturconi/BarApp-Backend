@@ -6,6 +6,7 @@ import {
   createOrder,
   deleteOrder,
   updateOrderState,
+  getUserOrders,
 } from '../order/controllers/order';
 
 import validatorOrder from '../order/validators/order';
@@ -20,6 +21,7 @@ const router = express.Router();
 
 router.get('/', [verifyToken, isAdmin], getOrders);
 router.get('/:id', [verifyToken, validateUserOrAdmin], getOrder);
+router.get('/user/:id', [verifyToken, validateUserOrAdmin], getUserOrders);
 router.post(
   '/',
   [verifyToken, validateUserOrAdmin],

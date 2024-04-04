@@ -5,6 +5,7 @@ import pool from '../../shared/db/conn';
 
 import * as OrderConstants from './queryConstants';
 import * as TableQueryConstants from '../../table/controllers/queryConstants';
+import * as UserQueryConstants from '../../user/controllers/queryConstants';
 
 import { handleServerError } from '../../shared/errorHandler';
 
@@ -22,6 +23,7 @@ import {
   checkTableState,
 } from '../../utils/checkOrder';
 import { OrderDetail } from '../models/orderDetail';
+import { User } from '../../user/models/user';
 
 export const getOrders = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
@@ -80,6 +82,55 @@ export const getOrder = async (req: Request, res: Response) => {
     return handleServerError({
       res,
       message: 'Ocurrio un error al obtener el pedido',
+      errorNumber: 500,
+    });
+  }
+};
+
+export const getUserOrders = async (req: Request, res: Response) => {
+  const page = parseInt(req.query.page as string) || 1;
+
+  const { id } = req.params;
+
+  try {
+    const [userFounded] = await pool.query<DbQueryResult<User[]>>(
+      UserQueryConstants.SELECT_USER_BY_ID,
+      [id]
+    );
+
+    if (userFounded.length <= 0) {
+      return handleServerError({
+        res,
+        message: 'Usuario no encontrado',
+        errorNumber: 404,
+      });
+    }
+
+    const [totalRows] = await pool.query<DbQueryResult<any[]>>(
+      OrderConstants.COUNT_ORDERS,
+      [null, null, userFounded[0].name, null, null, null]
+    );
+
+    const totalOrders = totalRows[0].total;
+
+    const perPage = parseInt(req.query.limit as string) || totalOrders;
+
+    const totalPages = Math.ceil(totalOrders / perPage);
+    const startIndex = (page - 1) * perPage;
+
+    const [orders] = await pool.query<DbQueryResult<Order[]>>(
+      OrderConstants.SELECT_USER_ORDERS,
+      [userFounded[0].id, startIndex, perPage]
+    );
+
+    return res.json(
+      new EntityListResponse(orders, totalOrders, page, totalPages)
+    );
+  } catch (error) {
+    console.log(error);
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al obtener la lista de Pedidos',
       errorNumber: 500,
     });
   }
