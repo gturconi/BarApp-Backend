@@ -11,7 +11,7 @@ export const SELECT_USER_ORDERS =
   'SELECT o.id, JSON_OBJECT("id", o.tableId, "number", t.number) as table_order, JSON_OBJECT("id", o.userId, "name", u.name) as user, JSON_OBJECT("id", os.id, "description", os.description) as state, o.date_created, o.total, o.feedback, o.score, CASE WHEN o.employeeId IS NULL THEN NULL ELSE JSON_OBJECT("id", o.employeeId, "name", emp.name) END as employee, JSON_ARRAYAGG(JSON_OBJECT("productId", od.productId, "promotionId", od.promotionId, "quantity", od.quantity, "unitPrice", od.unitPrice, "comments", od.comments)) AS orderDetails FROM orders AS o INNER JOIN orderDetail od ON od.orderId = o.id INNER JOIN orderState os ON os.id = o.idState INNER JOIN users u ON o.userId = u.id LEFT JOIN users emp ON o.employeeId = emp.id INNER JOIN tables t ON o.tableId = t.id WHERE u.id = ? GROUP BY o.id, o.tableId, t.number, o.userId, u.name, os.id, os.description, o.date_created, o.total, o.feedback, o.score, o.employeeId,emp.name ORDER BY date_created DESC LIMIT ?, ?';
 
 export const INSERT_ORDER =
-  'INSERT INTO orders (tableId, userId, idState, date_created, total, feedback, score, employeeId) VALUES (?, ?, ?, NOW(), ?, ?, ?, ?)';
+  'INSERT INTO orders (tableId, userId, idState, date_created, total, feedback, score, employeeId) VALUES (?, ?, ?, CONVERT_TZ(NOW(), "+00:00", "-03:00"), ?, ?, ?, ?)';
 
 export const INSERT_ORDER_DETAIL =
   ' INSERT INTO orderDetail (orderId, productId, promotionId, quantity, unitPrice, comments) VALUES (?, ?, ?, ?, ?, ?)';

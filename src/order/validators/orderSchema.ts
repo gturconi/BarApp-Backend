@@ -9,9 +9,11 @@ export const orderSchema = z.object({
     invalid_type_error: 'El campo userId debe ser un número',
   }),
 
-  employeeId: z.number({
-    invalid_type_error: 'El campo employeeId debe ser un número',
-  }),
+  employeeId: z
+    .number({
+      invalid_type_error: 'El campo employeeId debe ser un número',
+    })
+    .optional(),
 
   tableId: z.number({
     invalid_type_error: 'El campo tableId debe ser un número',

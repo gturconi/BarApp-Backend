@@ -26,6 +26,17 @@ const validatorOrder: ((
         orderDetails: req.body.orderDetails,
       };
 
+      req.body.orderDetails = req.body.orderDetails.map((od: any) => {
+        return {
+          orderId: od.orderId ? parseInt(od.orderId) : undefined,
+          productId: od.productId ? parseInt(od.productId) : undefined,
+          promotionId: od.promotionId ? parseInt(od.promotionId) : undefined,
+          quantity: od.quantity ? parseInt(od.quantity) : undefined,
+          unitPrice: od.unitPrice ? parseFloat(od.unitPrice) : undefined,
+          comments: od.comments ? od.comments : undefined,
+        };
+      });
+
       const isPutRequest = req.method === 'PUT';
 
       req.body.orderDetails.map((od: OrderDetail) => {
@@ -53,6 +64,7 @@ const validatorOrder: ((
           .json({ message: validatedData.error.formErrors.fieldErrors });
       }
     } catch (error) {
+      console.log(error);
       return res.status(500).json(error);
     }
   },

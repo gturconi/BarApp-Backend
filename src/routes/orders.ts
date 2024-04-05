@@ -15,6 +15,7 @@ import {
   validateUserOrAdmin,
   verifyToken,
   isEmployee,
+  validateUserOrder,
 } from '../middlewares/authJwt';
 
 const router = express.Router();
@@ -22,13 +23,8 @@ const router = express.Router();
 router.get('/', [verifyToken, isAdmin], getOrders);
 router.get('/:id', [verifyToken, validateUserOrAdmin], getOrder);
 router.get('/user/:id', [verifyToken, validateUserOrAdmin], getUserOrders);
-router.post(
-  '/',
-  [verifyToken, validateUserOrAdmin],
-  validatorOrder,
-  createOrder
-);
+router.post('/', [verifyToken, validateUserOrder], validatorOrder, createOrder);
+router.put('/:id', [verifyToken, isEmployee], validatorOrder, updateOrderState);
 router.delete('/:id', [verifyToken, validateUserOrAdmin], deleteOrder);
-router.put('/:id', [verifyToken, isEmployee], updateOrderState);
 
 export default router;
