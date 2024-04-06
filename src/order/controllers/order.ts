@@ -178,7 +178,7 @@ export const createOrder = async (req: Request, res: Response) => {
     if (!(await checkTableState(tableId, userId))) {
       return handleServerError({
         res,
-        message: `La mesa con id ${tableId} ya se encuentra ocupada por otro cliente`,
+        message: `La mesa con ${tableId} ya se encuentra ocupada por otro cliente`,
         errorNumber: 400,
       });
     }
