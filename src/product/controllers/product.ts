@@ -131,7 +131,7 @@ export const insertProduct = async (req: Request, res: Response) => {
       [insertedProductId]
     );
 
-    res.send({ product: ProductInserted[0] });
+    res.status(201).send({ product: ProductInserted[0] });
   } catch (error) {
     if (connection) await connection.rollback();
     return handleServerError({
@@ -157,7 +157,6 @@ export const updateProduct = async (req: Request, res: Response) => {
       resizedImage = Buffer.from([]);
       resizedImage = await sharp(newImage.buffer).resize(400).toBuffer();
     }
-
     connection = await pool.getConnection();
     await connection.beginTransaction();
 

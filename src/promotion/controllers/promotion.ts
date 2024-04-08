@@ -226,7 +226,7 @@ export const insertPromotion = async (req: Request, res: Response) => {
       [insertedPromotionId]
     );
 
-    res.send({ promotion: PromotionInserted[0] });
+    res.status(201).send({ promotion: PromotionInserted[0] });
   } catch (error) {
     if (connection) await connection.rollback();
     return handleServerError({

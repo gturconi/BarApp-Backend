@@ -155,3 +155,28 @@ export const validateUserOrAdmin = async (
     return res.status(500).send({ message: 'Ocurrió un error' });
   }
 };
+
+export const validateUserOrder = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userIdFromToken = req.userId;
+
+    if (!userIdFromToken) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+
+    const userOrderId = req.body.userId;
+
+    if (userIdFromToken == userOrderId) {
+      next();
+      return;
+    }
+
+    return res.status(403).json({ message: 'No autorizado' });
+  } catch (error) {
+    return res.status(500).send({ message: 'Ocurrió un error' });
+  }
+};
