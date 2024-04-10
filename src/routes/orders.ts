@@ -21,7 +21,7 @@ import {
 const router = express.Router();
 
 router.get('/', [verifyToken, isAdmin], getOrders);
-router.get('/:id', [verifyToken, validateUserOrAdmin], getOrder);
+router.get('/:id', [verifyToken, validateUserOrder], getOrder);
 router.get('/user/:id', [verifyToken, validateUserOrAdmin], getUserOrders);
 router.post('/', [verifyToken, validateUserOrder], validatorOrder, createOrder);
 router.put('/:id', [verifyToken, isEmployee], validatorOrder, updateOrderState);
