@@ -178,6 +178,9 @@ export const validateUserOrder = async (
         [requestedOrderId]
       );
 
+      if (order.length <= 0) {
+        return res.status(404).json({ message: 'No se encontro el pedido' });
+      }
       if (userIdFromToken == order[0].user.id.toString()) {
         next();
         return;
