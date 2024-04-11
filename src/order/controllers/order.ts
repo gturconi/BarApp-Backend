@@ -146,7 +146,7 @@ export const createOrder = async (req: Request, res: Response) => {
         if (!(await checkExistingProducts(orderDetail))) {
           return handleServerError({
             res,
-            message: `El producto con id ${orderDetail.productId} no existe`,
+            message: `El producto con id ${orderDetail.productId} no existe o no se encuentra activo`,
             errorNumber: 400,
           });
         }
@@ -154,7 +154,7 @@ export const createOrder = async (req: Request, res: Response) => {
         if (!(await checkExistingPromotions(orderDetail))) {
           return handleServerError({
             res,
-            message: `La promocion con id ${orderDetail.promotionId} no existe`,
+            message: `La promocion con id ${orderDetail.promotionId} no existe o no se encuentra activa`,
             errorNumber: 400,
           });
         }
