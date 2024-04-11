@@ -16,6 +16,10 @@ const validatorProductType: ((
       req.body = {
         description: req.body.description,
         image: req.file,
+        baja:
+          req.body.baja !== null && req.body.baja !== undefined
+            ? parseInt(req.body.baja)
+            : undefined,
       };
 
       const isPutRequest = req.method === 'PUT';
@@ -51,11 +55,20 @@ const validatorProductType: ((
           }, 'El formato de la foto debe ser jpg o png'),
       });
 
+      const baja = z
+        .number({
+          invalid_type_error: 'El campo baja debe ser un número',
+        })
+        .refine((value) => value === 0 || value === 1, {
+          message: 'El campo baja debe ser 0 o 1',
+        });
+
       const schema = z.object({
         description: isPutRequest
           ? descriptionValidation.optional()
           : descriptionValidation,
         image: isPutRequest ? imageValidation.optional() : imageValidation,
+        baja: baja.optional(),
       });
 
       const validatedData = schema.safeParse(req.body);
