@@ -32,6 +32,26 @@ export const checkExistingPromotions = async (orderDetail: OrderDetail) => {
       PromQueryConstants.SELECT_PROMOTION_BY_ID,
       [orderDetail.promotionId]
     );
+    const currentDay = new Date().getDay();
+    const currentDate = new Date();
+
+    if (
+      existingPromotions[0].days_of_week &&
+      !existingPromotions[0].days_of_week?.includes(currentDay)
+    )
+      return false;
+
+    if (
+      existingPromotions[0].valid_from &&
+      existingPromotions[0].valid_from > currentDate
+    )
+      return false;
+
+    if (
+      existingPromotions[0].valid_to &&
+      existingPromotions[0].valid_to < currentDate
+    )
+      return false;
 
     return existingPromotions.length > 0 && !existingPromotions[0].baja
       ? true

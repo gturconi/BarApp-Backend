@@ -129,7 +129,12 @@ export const updateProductType = async (req: Request, res: Response) => {
 
     const updateProductType = await pool.query<DbQueryInsert>(
       QueryConstants.UPDATE_PRODUCT_TYPE,
-      [updateData.description, resizedImage ? resizedImage : null, id]
+      [
+        updateData.description,
+        resizedImage ? resizedImage : null,
+        updateData.baja,
+        id,
+      ]
     );
 
     if (updateProductType[0].affectedRows <= 0) {

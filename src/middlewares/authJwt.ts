@@ -9,6 +9,8 @@ import { User } from '../user/models/user';
 import { DbQueryResult } from '../shared/queryTypes';
 import { UserRole } from '../types/userRol';
 import * as QueryConstants from '../user/controllers/queryConstants';
+import * as OrderConstants from '../order/controllers/queryConstants';
+import { Order } from '../order/models/order';
 
 dotenv.config();
 
@@ -166,6 +168,23 @@ export const validateUserOrder = async (
 
     if (!userIdFromToken) {
       return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+
+    const requestedOrderId = req.params.id;
+
+    if (requestedOrderId != null) {
+      const [order] = await pool.query<DbQueryResult<any[]>>(
+        OrderConstants.SELECT_ORDER_BY_ID,
+        [requestedOrderId]
+      );
+
+      if (order.length <= 0) {
+        return res.status(404).json({ message: 'No se encontro el pedido' });
+      }
+      if (userIdFromToken == order[0].user.id.toString()) {
+        next();
+        return;
+      }
     }
 
     const userOrderId = req.body.userId;
