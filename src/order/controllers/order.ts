@@ -382,3 +382,39 @@ export const updateOrderState = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getLastOrderFromTable = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!(await checkExistingTables(id))) {
+      return handleServerError({
+        res,
+        message: `La mesa no existe`,
+        errorNumber: 400,
+      });
+    }
+
+    const [lastOrder] = await pool.query<DbQueryResult<any[]>>(
+      OrderConstants.CHECK_EXISTING_ORDER_IN_TABLE,
+      [id]
+    );
+
+    if (lastOrder.length <= 0) {
+      return handleServerError({
+        res,
+        message: `La mesa no no registra ningún pedido`,
+        errorNumber: 400,
+      });
+    }
+
+    return res.status(200).json(lastOrder[0]);
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al obtener el pedido',
+      errorNumber: 500,
+      error,
+    });
+  }
+};

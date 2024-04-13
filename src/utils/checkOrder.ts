@@ -87,10 +87,12 @@ export const checkTableState = async (idTable: string, idUser: string) => {
 
     const [existingOrder] = await pool.query<DbQueryResult<any[]>>(
       OrderQueryConstants.CHECK_EXISTING_ORDER_IN_TABLE,
-      [idTable, idUser]
+      [idTable]
     );
 
-    return existingOrder.length > 0 ? true : false;
+    return existingOrder.length > 0 && existingOrder[0].userId === idUser
+      ? true
+      : false;
   } catch (error) {
     return error;
   }
