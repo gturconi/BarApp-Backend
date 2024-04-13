@@ -170,6 +170,16 @@ export const validateUserOrder = async (
       return res.status(401).json({ message: 'Usuario no autenticado' });
     }
 
+    const [rows] = await pool.query<DbQueryResult<UserRole[]>>(
+      QueryConstants.SELECT_USER_BY_ID,
+      [userIdFromToken]
+    );
+
+    if (rows && rows[0].role === 'admin') {
+      next();
+      return;
+    }
+
     const requestedOrderId = req.params.id;
 
     if (requestedOrderId != null) {
