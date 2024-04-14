@@ -36,3 +36,6 @@ export const CHECK_EXISTING_ORDER_STATE =
 
 export const SAVE_TICKET =
   'INSERT INTO tickets (order_id, date_created, user_email, payment_method, status, total_paid_amount) VALUES (?, ?, ?, ?, ?, ?)';
+
+export const GET_ALL_ORDERS_USER_TABLE =
+  'SELECT o.id, o.userId, st.description as status FROM orders o INNER JOIN orderState st ON st.id = o.idState WHERE userId = ?  AND tableId = ? AND DATE(o.date_created) = CURDATE()';

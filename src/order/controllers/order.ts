@@ -408,7 +408,12 @@ export const getLastOrderFromTable = async (req: Request, res: Response) => {
       });
     }
 
-    return res.status(200).json(lastOrder[0]);
+    const [allOrders] = await pool.query<DbQueryResult<any[]>>(
+      OrderConstants.GET_ALL_ORDERS_USER_TABLE,
+      [lastOrder[0].userId, id]
+    );
+
+    return res.status(200).json(allOrders);
   } catch (error) {
     return handleServerError({
       res,
