@@ -61,11 +61,11 @@ export const checkExistingPromotions = async (orderDetail: OrderDetail) => {
   }
 };
 
-export const checkExistingTables = async (id: string) => {
+export const checkExistingTables = async (number: string) => {
   try {
     const [existingTables] = await pool.query<DbQueryResult<Table[]>>(
-      TableQueryConstants.SELECT_TABLE_BY_ID,
-      [id]
+      TableQueryConstants.SELECT_TABLE_BY_NUMBER,
+      [number]
     );
 
     return existingTables.length > 0 ? true : false;
@@ -74,11 +74,16 @@ export const checkExistingTables = async (id: string) => {
   }
 };
 
-export const checkTableState = async (idTable: string, idUser: string) => {
+export const checkTableState = async (tableNumber: string, idUser: string) => {
   try {
+    const [tableFounded] = await pool.query<DbQueryResult<Table[]>>(
+      TableQueryConstants.SELECT_TABLE_BY_NUMBER,
+      [tableNumber]
+    );
+
     const [existingTables] = await pool.query<DbQueryResult<any[]>>(
       TableQueryConstants.SELECT_TABLE_BY_ID,
-      [idTable]
+      [tableFounded[0].id]
     );
 
     let tableFound = existingTables[0];
@@ -87,7 +92,7 @@ export const checkTableState = async (idTable: string, idUser: string) => {
 
     const [existingOrder] = await pool.query<DbQueryResult<any[]>>(
       OrderQueryConstants.CHECK_EXISTING_ORDER_IN_TABLE,
-      [idTable]
+      [tableFounded[0].id]
     );
 
     return existingOrder.length > 0 && existingOrder[0].userId === idUser

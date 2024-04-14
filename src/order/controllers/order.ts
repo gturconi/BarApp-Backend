@@ -26,6 +26,7 @@ import {
 } from '../../utils/checkOrder';
 import { OrderDetail } from '../models/orderDetail';
 import { User } from '../../user/models/user';
+import { Table } from '../../table/models/table';
 
 dotenv.config();
 
@@ -143,11 +144,11 @@ export const getUserOrders = async (req: Request, res: Response) => {
 export const createOrder = async (req: Request, res: Response) => {
   let connection = null;
   try {
-    const { tableId, userId, total, orderDetails } = req.body;
+    const { tableNumber, userId, total, orderDetails } = req.body;
 
     const secret = process.env.SECRET || '';
 
-    const decodedToken = jwt.verify(tableId, secret);
+    const decodedToken = jwt.verify(tableNumber, secret);
     let tableIdDecoded = 0;
     if (typeof decodedToken === 'object' && 'number' in decodedToken) {
       tableIdDecoded = decodedToken.number;
@@ -182,7 +183,7 @@ export const createOrder = async (req: Request, res: Response) => {
     if (!(await checkExistingTables(tableIdDecoded.toString()))) {
       return handleServerError({
         res,
-        message: `La mesa con id ${tableIdDecoded.toString()} no existe`,
+        message: `La mesa numero ${tableIdDecoded.toString()} no existe`,
         errorNumber: 400,
       });
     }
@@ -203,14 +204,6 @@ export const createOrder = async (req: Request, res: Response) => {
       });
     }
 
-    /* if (!(await checkExistingUsers(employeeId, ROLES[2]))) {
-      return handleServerError({
-        res,
-        message: `El empleado con id ${employeeId} no existe`,
-        errorNumber: 400,
-      });
-    }*/
-
     if (await checkExistingUnconfirmedOrder(userId)) {
       return handleServerError({
         res,
@@ -223,9 +216,14 @@ export const createOrder = async (req: Request, res: Response) => {
 
     await connection.beginTransaction();
 
+    const [tableFounded] = await pool.query<DbQueryResult<Table[]>>(
+      TableQueryConstants.SELECT_TABLE_BY_NUMBER,
+      [tableNumber]
+    );
+
     const savedOrder = await pool.query<DbQueryInsert>(
       OrderConstants.INSERT_ORDER,
-      [tableIdDecoded.toString(), userId, 1, total, null, null, null]
+      [tableFounded[0].id, userId, 1, total, null, null, null]
     );
 
     for (const orderDetail of orderDetails as OrderDetail[]) {
