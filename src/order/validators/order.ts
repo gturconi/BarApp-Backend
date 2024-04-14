@@ -18,7 +18,7 @@ const validatorOrder: ((
         employeeId: req.body.employeeId
           ? parseInt(req.body.employeeId)
           : undefined,
-        tableId: req.body.tableId ? parseInt(req.body.tableId) : undefined,
+        tableId: req.body.tableId,
         idState: req.body.idState ? parseInt(req.body.idState) : undefined,
         total: req.body.total ? parseFloat(req.body.total) : undefined,
         feedback: req.body.feedback,

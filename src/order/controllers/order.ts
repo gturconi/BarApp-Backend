@@ -1,4 +1,6 @@
 import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
 import { DbQueryInsert, DbQueryResult } from '../../shared/queryTypes';
 import pool from '../../shared/db/conn';
@@ -24,6 +26,8 @@ import {
 } from '../../utils/checkOrder';
 import { OrderDetail } from '../models/orderDetail';
 import { User } from '../../user/models/user';
+
+dotenv.config();
 
 export const getOrders = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
@@ -141,6 +145,14 @@ export const createOrder = async (req: Request, res: Response) => {
   try {
     const { tableId, userId, total, orderDetails } = req.body;
 
+    const secret = process.env.SECRET || '';
+
+    const decodedToken = jwt.verify(tableId, secret);
+    let tableIdDecoded = 0;
+    if (typeof decodedToken === 'object' && 'number' in decodedToken) {
+      tableIdDecoded = decodedToken.number;
+    }
+
     for (const orderDetail of orderDetails) {
       if (orderDetail.productId != undefined) {
         if (!(await checkExistingProducts(orderDetail))) {
@@ -167,18 +179,18 @@ export const createOrder = async (req: Request, res: Response) => {
       }
     }
 
-    if (!(await checkExistingTables(tableId))) {
+    if (!(await checkExistingTables(tableIdDecoded.toString()))) {
       return handleServerError({
         res,
-        message: `La mesa con id ${tableId} no existe`,
+        message: `La mesa con id ${tableIdDecoded.toString()} no existe`,
         errorNumber: 400,
       });
     }
 
-    if (!(await checkTableState(tableId, userId))) {
+    if (!(await checkTableState(tableIdDecoded.toString(), userId))) {
       return handleServerError({
         res,
-        message: `La mesa ${tableId} ya se encuentra ocupada por otro cliente`,
+        message: `La mesa ${tableIdDecoded.toString()} ya se encuentra ocupada por otro cliente`,
         errorNumber: 400,
       });
     }
@@ -213,7 +225,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
     const savedOrder = await pool.query<DbQueryInsert>(
       OrderConstants.INSERT_ORDER,
-      [tableId, userId, 1, total, null, null, null]
+      [tableIdDecoded.toString(), userId, 1, total, null, null, null]
     );
 
     for (const orderDetail of orderDetails as OrderDetail[]) {
@@ -244,7 +256,7 @@ export const createOrder = async (req: Request, res: Response) => {
     await pool.query<DbQueryInsert>(TableQueryConstants.UPDATE_TABLE, [
       null,
       2,
-      tableId,
+      tableIdDecoded.toString(),
     ]);
 
     await connection.commit();
