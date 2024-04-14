@@ -149,6 +149,7 @@ export const createOrder = async (req: Request, res: Response) => {
     const secret = process.env.SECRET || '';
 
     const decodedToken = jwt.verify(tableNumber, secret);
+
     let tableIdDecoded = 0;
     if (typeof decodedToken === 'object' && 'number' in decodedToken) {
       tableIdDecoded = decodedToken.number;
@@ -218,9 +219,9 @@ export const createOrder = async (req: Request, res: Response) => {
 
     const [tableFounded] = await pool.query<DbQueryResult<Table[]>>(
       TableQueryConstants.SELECT_TABLE_BY_NUMBER,
-      [tableNumber]
+      [tableIdDecoded.toString()]
     );
-
+    console.log(tableFounded);
     const savedOrder = await pool.query<DbQueryInsert>(
       OrderConstants.INSERT_ORDER,
       [tableFounded[0].id, userId, 1, total, null, null, null]
