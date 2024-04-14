@@ -4,7 +4,7 @@ import { isAdmin, verifyToken } from '../middlewares/authJwt';
 
 const router = express.Router();
 
-router.get('/', [verifyToken, isAdmin], getQrs);
-router.post('/', [verifyToken, isAdmin], generateQrs);
+router.get('/', /*[verifyToken, isAdmin],*/ getQrs);
+router.post('/', /* [verifyToken, isAdmin], */ generateQrs);
 
 export default router;

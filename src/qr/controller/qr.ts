@@ -24,7 +24,7 @@ export const generateQrs = async (req: Request, res: Response) => {
     for (let i = 0; i < tables.length; i++) {
       tokens.push(jwt.sign({ number: tables[i].number }, secret));
       await pool.query<DbQueryResult<any[]>>(INSERT_QRS, [
-        tables[i].id,
+        tables[i].number,
         tokens[i],
       ]);
     }
