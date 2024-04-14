@@ -15,8 +15,8 @@ export const orderSchema = z.object({
     })
     .optional(),
 
-  tableId: z.number({
-    invalid_type_error: 'El campo tableId debe ser un número',
+  tableId: z.string({
+    invalid_type_error: 'El campo tableId debe ser un string',
   }),
 
   idState: z
