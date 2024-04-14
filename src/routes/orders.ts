@@ -27,6 +27,6 @@ router.get('/user/:id', [verifyToken, validateUserOrAdmin], getUserOrders);
 router.get('/tableOrder/:id', [verifyToken], getLastOrderFromTable);
 router.post('/', [verifyToken, validateUserOrder], validatorOrder, createOrder);
 router.put('/:id', [verifyToken, isEmployee], validatorOrder, updateOrderState);
-router.delete('/:id', [verifyToken, validateUserOrAdmin], deleteOrder);
+router.delete('/:id', [verifyToken, validateUserOrder], deleteOrder);
 
 export default router;
