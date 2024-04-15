@@ -175,7 +175,7 @@ export const validateUserOrder = async (
       [userIdFromToken]
     );
 
-    if (rows && rows[0].role === 'admin') {
+    if ((rows && rows[0].role === 'admin') || rows[0].role === 'employee') {
       next();
       return;
     }
