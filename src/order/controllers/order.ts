@@ -255,7 +255,7 @@ export const createOrder = async (req: Request, res: Response) => {
     await pool.query<DbQueryInsert>(TableQueryConstants.UPDATE_TABLE, [
       null,
       2,
-      tableIdDecoded.toString(),
+      tableFounded[0].id,
     ]);
 
     await connection.commit();
