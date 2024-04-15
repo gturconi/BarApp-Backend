@@ -8,6 +8,7 @@ import pool from '../../shared/db/conn';
 import * as OrderConstants from './queryConstants';
 import * as TableQueryConstants from '../../table/controllers/queryConstants';
 import * as UserQueryConstants from '../../user/controllers/queryConstants';
+import * as QrQueryConstants from '../../qr/controller/queryConstants';
 
 import { handleServerError } from '../../shared/errorHandler';
 
@@ -147,6 +148,28 @@ export const createOrder = async (req: Request, res: Response) => {
     const { tableNumber, userId, total, orderDetails } = req.body;
 
     const secret = process.env.SECRET || '';
+
+    const [qrs] = await pool.query<DbQueryResult<any[]>>(
+      QrQueryConstants.SELECT_QRS
+    );
+
+    if (qrs.length <= 0) {
+      return handleServerError({
+        res,
+        message: 'No se encontraron codigos para el pedido',
+        errorNumber: 404,
+      });
+    }
+
+    const tokenFound = qrs.find((q) => q.token == tableNumber);
+
+    if (!tokenFound) {
+      return handleServerError({
+        res,
+        message: 'El codigo escaneado es invalido',
+        errorNumber: 400,
+      });
+    }
 
     const decodedToken = jwt.verify(tableNumber, secret);
 
