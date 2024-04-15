@@ -322,11 +322,18 @@ export const deleteOrder = async (req: Request, res: Response) => {
 
     await pool.query<DbQueryResult<Order[]>>(OrderConstants.DELETE_ORDER, [id]);
 
-    await pool.query<DbQueryInsert>(TableQueryConstants.UPDATE_TABLE, [
-      null,
-      1,
-      existingOrders[0].table_order.id,
-    ]);
+    const [orders] = await pool.query<DbQueryResult<Order[]>>(
+      OrderConstants.GET_ALL_ORDERS_USER_TABLE,
+      [existingOrders[0].userId, existingOrders[0].table_order.id]
+    );
+
+    if (orders.filter((order) => order.idState != 4).length < 2) {
+      await pool.query<DbQueryInsert>(TableQueryConstants.UPDATE_TABLE, [
+        null,
+        1,
+        existingOrders[0].table_order.id,
+      ]);
+    }
 
     await connection.commit();
     return res.status(200).json({ message: 'Pedido eliminado exitosamente' });
