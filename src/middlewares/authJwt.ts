@@ -59,6 +59,28 @@ export async function verifyToken(
   }
 }
 
+export const isAdminOrEmployee = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const [rows] = await pool.query<DbQueryResult<UserRole[]>>(
+      QueryConstants.SELECT_USER_BY_ID,
+      [req.userId]
+    );
+    if ((rows && rows[0].role === 'admin') || rows[0].role === 'employee') {
+      next();
+      return;
+    }
+    return res
+      .status(403)
+      .json({ message: 'Requiere permisos de administrador!' });
+  } catch (error) {
+    return res.status(500).send({ message: 'Ocurrió un error' });
+  }
+};
+
 export const validateIdentity = (
   req: Request,
   res: Response,
