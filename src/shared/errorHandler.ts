@@ -25,7 +25,7 @@ export const handleServerError = ({
         return res.status(errorNumber).json({
           token,
           message:
-            "No se pudo borrar la información. La entrada que intentas borrar se encuentra referenciada",
+            "Lo siento, no podemos eliminar la información en este momento ya que está siendo utilizada en otro lugar",
         });
     }
   }
