@@ -34,9 +34,12 @@ export const generateQrs = async (req: Request, res: Response) => {
         tokens[i],
       ]);
     }
+
+    const [qrs] = await pool.query<DbQueryResult<any[]>>(SELECT_QRS);
+
     await connection.commit();
 
-    return res.status(200).json(tokens);
+    return res.status(200).json(qrs);
   } catch (error) {
     if (connection) await connection.rollback();
     return handleServerError({
