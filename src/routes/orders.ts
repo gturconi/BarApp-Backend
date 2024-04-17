@@ -12,7 +12,7 @@ import {
 
 import validatorOrder from '../order/validators/order';
 import {
-  isAdmin,
+  validateEmployeeOrders,
   validateUserOrAdmin,
   verifyToken,
   isEmployee,
@@ -21,7 +21,7 @@ import {
 
 const router = express.Router();
 
-router.get('/', [verifyToken, isAdmin], getOrders);
+router.get('/', [verifyToken, validateEmployeeOrders], getOrders);
 router.get('/:id', [verifyToken, validateUserOrder], getOrder);
 router.get('/user/:id', [verifyToken, validateUserOrAdmin], getUserOrders);
 router.get('/tableOrder/:id', [verifyToken], getLastOrderFromTable);

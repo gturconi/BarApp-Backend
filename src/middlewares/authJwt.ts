@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { decode } from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 import { Request, Response } from 'express';
@@ -227,6 +227,48 @@ export const validateUserOrder = async (
     }
 
     return res.status(403).json({ message: 'No autorizado' });
+  } catch (error) {
+    return res.status(500).send({ message: 'Ocurrió un error' });
+  }
+};
+
+export const validateEmployeeOrders = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  let token = req.headers['x-access-token'] as string;
+  const secret = process.env.SECRET || '';
+
+  const { search } = req.query;
+  let userId = '';
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    if (typeof decoded === 'object' && 'id' in decoded) {
+      userId = decoded.id;
+    }
+
+    const [user] = await pool.query<DbQueryResult<UserRole[]>>(
+      QueryConstants.SELECT_USER_BY_ID,
+      [req.userId]
+    );
+
+    if (user && user[0].role === 'admin') {
+      next();
+      return;
+    } else if (
+      user &&
+      user[0].role === 'employee' &&
+      user[0].name.toLocaleLowerCase() ===
+        (search as string)?.toLocaleLowerCase()
+    ) {
+      next();
+      return;
+    }
+    return res
+      .status(403)
+      .json({ message: 'Requiere permisos de administrador!' });
   } catch (error) {
     return res.status(500).send({ message: 'Ocurrió un error' });
   }
