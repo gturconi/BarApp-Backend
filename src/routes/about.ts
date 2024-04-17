@@ -1,8 +1,9 @@
 import express from 'express';
-import { getContact } from '../about/controllers/about';
+import { getContact, putContact } from '../about/controllers/about';
 
 const router = express.Router();
 
 router.get('/', getContact);
+router.put('/:id', putContact);
 
 export default router;

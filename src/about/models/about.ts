@@ -1,4 +1,5 @@
 export class Contact {
+  public id: string;
   public name: string;
   public description: string;
   public tel: string;
@@ -6,13 +7,16 @@ export class Contact {
   public open_dayhr: string;
   public contact_email: string | null;
 
-  constructor(name: string,
+  constructor(
+  id: string,
+  name: string,
   description: string,
   tel: string,
   address: string,
   open_dayhr: string,
   contact_email: string | null,
 ) {
+    this.id = id;
     this.name = name;
     this.description = description;
     this.tel = tel;
