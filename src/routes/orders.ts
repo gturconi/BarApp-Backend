@@ -8,6 +8,7 @@ import {
   updateOrderState,
   getUserOrders,
   getLastOrderFromTable,
+  checkQR,
 } from '../order/controllers/order';
 
 import validatorOrder from '../order/validators/order';
@@ -26,6 +27,7 @@ router.get('/:id', [verifyToken, validateUserOrder], getOrder);
 router.get('/user/:id', [verifyToken, validateUserOrAdmin], getUserOrders);
 router.get('/tableOrder/:id', [verifyToken], getLastOrderFromTable);
 router.post('/', [verifyToken, validateUserOrder], validatorOrder, createOrder);
+router.post('/checkQR', [verifyToken], checkQR);
 router.put('/:id', [verifyToken, isEmployee], validatorOrder, updateOrderState);
 router.delete('/:id', [verifyToken, validateUserOrder], deleteOrder);
 

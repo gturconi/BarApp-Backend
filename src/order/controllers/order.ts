@@ -464,3 +464,41 @@ export const getLastOrderFromTable = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const checkQR = async (req: Request, res: Response) => {
+  try {
+    const { data } = req.body;
+
+    const secret = process.env.SECRET || '';
+
+    const [qrs] = await pool.query<DbQueryResult<any[]>>(
+      QrQueryConstants.SELECT_QRS
+    );
+
+    if (qrs.length <= 0) {
+      return handleServerError({
+        res,
+        message: 'No se encontraron codigos para el pedido',
+        errorNumber: 404,
+      });
+    }
+
+    const tokenFound = qrs.find((q) => q.token == data);
+
+    if (!tokenFound) {
+      return handleServerError({
+        res,
+        message: 'El codigo escaneado es invalido',
+        errorNumber: 400,
+      });
+    }
+
+    return res.status(200).json({ message: 'Codigo validado' });
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al validar el código',
+      errorNumber: 500,
+    });
+  }
+};
