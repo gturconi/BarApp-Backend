@@ -2,9 +2,18 @@ import app from './app';
 import app2 from './socket';
 import { webSocketApp } from './socket';
 
+const admin = require('firebase-admin');
+const { initializeApp, applicationDefault } = require('firebase-admin/app');
+
 // Db connection
 import pool from './shared/db/conn';
 pool;
+
+//Firebase Admin
+admin.initializeApp({
+  credential: applicationDefault(),
+  projectId: 'barapp-1b377',
+});
 
 // Settings
 app.set('port', process.env.PORT || 3306);

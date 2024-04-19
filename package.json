@@ -33,6 +33,7 @@
     "@types/mercadopago": "^1.5.11",
     "@types/multer": "^1.4.11",
     "@types/nodemailer": "^6.4.14",
+    "firebase-admin": "^12.1.0",
     "tsc-watch": "^6.0.4",
     "typescript": "^5.3.3"
   }
