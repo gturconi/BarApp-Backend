@@ -5,6 +5,8 @@ import { webSocketApp } from './socket';
 const admin = require('firebase-admin');
 const { initializeApp, applicationDefault } = require('firebase-admin/app');
 
+process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
 // Db connection
 import pool from './shared/db/conn';
 pool;
