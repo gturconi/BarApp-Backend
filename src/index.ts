@@ -1,11 +1,12 @@
 import app from './app';
 import app2 from './socket';
 import { webSocketApp } from './socket';
+import admin from 'firebase-admin';
 
-const admin = require('firebase-admin');
-const { initializeApp, applicationDefault } = require('firebase-admin/app');
-
-process.env.GOOGLE_APPLICATION_CREDENTIALS;
+//const admin = require('firebase-admin');
+//const { initializeApp, applicationDefault } = require('firebase-admin/app');
+var serviceAccount = require('../' +
+  process.env.GOOGLE_APPLICATION_CREDENTIALS!);
 
 // Db connection
 import pool from './shared/db/conn';
@@ -13,7 +14,8 @@ pool;
 
 //Firebase Admin
 admin.initializeApp({
-  credential: applicationDefault(),
+  //credential: applicationDefault(),
+  credential: admin.credential.cert(serviceAccount),
   projectId: 'barapp-1b377',
 });
 
