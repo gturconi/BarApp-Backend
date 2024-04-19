@@ -23,6 +23,7 @@ const validatorUser: ((
         tel: req.body.tel,
         baja: req.body.baja ? parseFloat(req.body.baja) : undefined,
         avatar: req.file,
+        fcm_token: req.body.fcm_token ? req.body.fcm_token : undefined,
       };
 
       const isPutRequest = req.method === 'PUT';
@@ -107,6 +108,16 @@ const validatorUser: ((
           }, 'El formato de la foto debe ser jpg o png'),
       });
 
+      const fcm_token = z
+        .string({
+          required_error: 'El campo fcm_token no puede estar vacío',
+          invalid_type_error: 'El campo fcm_token debe ser una cadena de texto',
+        })
+        .min(1, {
+          message: 'El campo fcm_token debe tener al menos un caracter',
+        })
+        .optional();
+
       const schema = z.object({
         name: optional ? nameValidation.optional() : nameValidation,
         email: isPutRequest ? emailValidation.optional() : emailValidation,
@@ -117,6 +128,7 @@ const validatorUser: ((
         tel: optional ? telValidation.optional() : telValidation,
         baja: baja.optional(),
         avatar: avatarValidation.optional(),
+        fcm_token: fcm_token.optional(),
       });
 
       const validatedData = schema.safeParse(req.body);

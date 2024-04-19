@@ -1,5 +1,5 @@
-import bcrypt from "bcryptjs";
-import { Baja } from "../../shared/constants";
+import bcrypt from 'bcryptjs';
+import { Baja } from '../../shared/constants';
 
 export class User {
   public id?: number;
@@ -10,6 +10,7 @@ export class User {
   public role: number;
   public baja: Baja;
   public avatar?: Buffer;
+  public fcm_token?: string;
 
   constructor(
     name: string,
@@ -19,7 +20,8 @@ export class User {
     baja?: Baja,
     id?: number,
     role?: number,
-    avatar?: Buffer
+    avatar?: Buffer,
+    fcm_token?: string
   ) {
     this.id = id || 0;
     this.name = name;
@@ -29,6 +31,7 @@ export class User {
     this.role = role || 0;
     this.baja = baja || 0;
     this.avatar = avatar;
+    this.fcm_token = fcm_token;
   }
 
   static comparePasswords = async (

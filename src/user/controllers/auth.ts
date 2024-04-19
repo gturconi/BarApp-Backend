@@ -168,6 +168,13 @@ export const recoverPasswordHandler = async (req: Request, res: Response) => {
 
     const userFound = rows[0];
 
+    if (req.body.fcmToken != null) {
+      await pool.query<DbQueryInsert>(QueryConstants.UPDATE_FCM_TOKEN, [
+        req.body.fcmToken,
+        userFound.id,
+      ]);
+    }
+
     const token = generateToken(userFound.id);
 
     await sendEmail(userFound, token);

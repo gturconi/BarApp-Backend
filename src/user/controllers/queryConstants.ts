@@ -22,3 +22,6 @@ export const UPDATE_USER =
   'UPDATE users SET name = IFNULL(?, name), tel = IFNULL(?, tel), email = IFNULL(?, email), password = IFNULL(?, password) ,rol_id = IFNULL(?, rol_id), baja = IFNULL(?, baja) ,avatar = IFNULL(?, avatar) WHERE id = ?';
 
 export const DELETE_USER = 'DELETE FROM users WHERE id = ?';
+
+export const UPDATE_FCM_TOKEN =
+  'UPDATE users SET fcm_token = IFNULL(?, fcm_token) WHERE id = ?';
