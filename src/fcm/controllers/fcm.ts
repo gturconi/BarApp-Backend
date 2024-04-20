@@ -28,16 +28,16 @@ export const sendNotification = async (req: Request, res: Response) => {
       body.replace('X', getTable(receivedToken));
     }
   }
-
+  console.log(tokens);
   const message = {
-    notification: {
+    data: {
       title: title,
       body: body,
     },
     tokens: tokens,
     // token: receivedToken,
   };
-
+  console.log('message: ', message);
   // Enviar la notificación utilizando el SDK de Firebase Admin
   getMessaging()
     .sendMulticast(message)
