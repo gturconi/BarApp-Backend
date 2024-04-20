@@ -29,18 +29,18 @@ export const sendNotification = async (req: Request, res: Response) => {
     }
   }
   console.log(tokens);
-  const payload = {
-    data: {
+  const message = {
+    notification: {
       title: title,
       body: body,
     },
+    tokens: tokens,
     // token: receivedToken,
   };
-
-  console.log('message: ', payload);
+  console.log('message: ', message);
   // Enviar la notificación utilizando el SDK de Firebase Admin
   getMessaging()
-    .sendToDevice(tokens, payload)
+    .sendMulticast(message)
     .then((response: any) => {
       console.log('Successfully sent message:', response);
       // Response is a message ID string.
