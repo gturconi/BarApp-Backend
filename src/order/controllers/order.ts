@@ -494,6 +494,7 @@ export const checkQR = async (req: Request, res: Response) => {
 
     return res.status(200).json({ message: 'Codigo validado' });
   } catch (error) {
+    console.log(error);
     return handleServerError({
       res,
       message: 'Ocurrio un error al validar el código',
