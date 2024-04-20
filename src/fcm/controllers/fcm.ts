@@ -58,11 +58,11 @@ export const sendNotification = async (req: Request, res: Response) => {
 };
 
 async function searchEmployeeFcmTokens() {
-  const [tokens] = await pool.query<DbQueryResult<string[]>>(
+  const [tokens] = await pool.query<DbQueryResult<any[]>>(
     QueryConstants.SELECT_EMPLOYEE_FCM_TOKEN
   );
 
-  return tokens;
+  return tokens.map((obj) => obj.fcm_token);
 }
 
 function getTable(token: string) {
