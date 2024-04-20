@@ -468,6 +468,8 @@ export const getLastOrderFromTable = async (req: Request, res: Response) => {
 export const checkQR = async (req: Request, res: Response) => {
   try {
     const { code } = req.body;
+    console.log(code);
+
     const secret = process.env.SECRET || '';
 
     const [qrs] = await pool.query<DbQueryResult<any[]>>(
@@ -483,7 +485,7 @@ export const checkQR = async (req: Request, res: Response) => {
     }
 
     const tokenFound = qrs.find((q) => q.token == code);
-
+    console.log(tokenFound);
     if (!tokenFound) {
       return handleServerError({
         res,
