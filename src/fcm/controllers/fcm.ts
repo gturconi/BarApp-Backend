@@ -30,7 +30,7 @@ export const sendNotification = async (req: Request, res: Response) => {
   }
   console.log(tokens);
   const message = {
-    notification: {
+    data: {
       title: title,
       body: body,
     },
@@ -43,7 +43,17 @@ export const sendNotification = async (req: Request, res: Response) => {
     .sendMulticast(message)
     .then((response: any) => {
       console.log('Successfully sent message:', response);
-      // Response is a message ID string.
+
+      if (response.failureCount > 0) {
+        const failedTokens: string[] = [];
+        response.responses.forEach((resp: any, idx: number) => {
+          if (!resp.success) {
+            failedTokens.push(tokens[idx]);
+          }
+        });
+        console.log('List of tokens that caused failures: ' + failedTokens);
+      }
+
       res.status(200);
     })
     .catch((error: any) => {
