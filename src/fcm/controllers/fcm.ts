@@ -34,8 +34,7 @@ export const sendNotification = async (req: Request, res: Response) => {
       title: title,
       body: body,
     },
-    token:
-      'dBpNAIKUSZ2ZuW3dqsG1_J:APA91bE-7VGeQWylsTbKDof21GXoY5m2tbkw43yNsjF1F_o6oUYzYogK2gfIiXaSY9-gTXnPi-1dh-HnItvsA5vj6g_IeCP_B1t4PJYdqtwVr8QbS99ogLtz9yYHjNgkO_uamlTh897s',
+    token: tokens[0],
     // token: receivedToken,
   };
   console.log('message: ', message);
