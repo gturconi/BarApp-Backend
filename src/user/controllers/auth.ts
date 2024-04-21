@@ -140,15 +140,11 @@ export const signinHandler = async (req: Request, res: Response) => {
       });
 
     if (req.body.fcm_token != null) {
-      const [tokens] = await pool.query<DbQueryResult<string[]>>(
+      const [tokens] = await pool.query<DbQueryResult<any[]>>(
         QueryConstants.SELECT_FCM_TOKEN
       );
-      console.log('tokens: ', tokens);
-      console.log(
-        'find: ',
-        tokens.find((token) => token == req.body.fcm_token)
-      );
-      if (!tokens.find((token) => token == req.body.fcm_token)) {
+
+      if (!tokens.find((token) => token.fcm_token == req.body.fcm_token)) {
         await pool.query<DbQueryInsert>(QueryConstants.UPDATE_FCM_TOKEN, [
           req.body.fcm_token,
           userFound.id,
