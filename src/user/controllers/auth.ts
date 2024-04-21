@@ -139,6 +139,8 @@ export const signinHandler = async (req: Request, res: Response) => {
         token: null,
       });
 
+    console.log('token input: ', req.body.fcmToken);
+
     if (req.body.fcmToken != null) {
       console.log('fcmToken: ', req.body.fcmToken);
       const [tokens] = await pool.query<DbQueryResult<string[]>>(
