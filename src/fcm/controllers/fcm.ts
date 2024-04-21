@@ -30,17 +30,18 @@ export const sendNotification = async (req: Request, res: Response) => {
   }
   console.log(tokens);
   const message = {
-    data: {
+    notification: {
       title: title,
       body: body,
     },
-    tokens: tokens,
+    token:
+      'dBpNAIKUSZ2ZuW3dqsG1_J:APA91bE-7VGeQWylsTbKDof21GXoY5m2tbkw43yNsjF1F_o6oUYzYogK2gfIiXaSY9-gTXnPi-1dh-HnItvsA5vj6g_IeCP_B1t4PJYdqtwVr8QbS99ogLtz9yYHjNgkO_uamlTh897s',
     // token: receivedToken,
   };
   console.log('message: ', message);
   // Enviar la notificación utilizando el SDK de Firebase Admin
   getMessaging()
-    .sendMulticast(message)
+    .send(message)
     .then((response: any) => {
       console.log('Successfully sent message:', response);
 
