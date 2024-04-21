@@ -26,8 +26,7 @@ export const DELETE_USER = 'DELETE FROM users WHERE id = ?';
 export const UPDATE_FCM_TOKEN =
   'UPDATE users SET fcm_token = IFNULL(?, fcm_token) WHERE id = ?';
 
-export const SELECT_FCM_TOKEN =
-  'SELECT fcm_token FROM users WHERE user.baja = 0';
+export const SELECT_FCM_TOKEN = 'SELECT fcm_token FROM users WHERE baja = 0';
 
 export const SELECT_EMPLOYEE_FCM_TOKEN =
   'SELECT us.fcm_token FROM users AS us INNER JOIN roles AS rol ON us.rol_id = rol.id WHERE rol.name LIKE "employee" AND us.baja = 0 AND us.fcm_token IS NOT NULL';
