@@ -20,18 +20,8 @@ export const createOrder = async (req: Request, res: Response) => {
   mercadopago.configure({
     access_token: process.env.MERCADOPAGO_API_KEY as string,
   });
+  console.log(' user-agent:', req.headers['user-agent']);
   /*
-  const {
-    tableId,
-    userId,
-    idState,
-    orderDetails,
-    date_created,
-    total,
-    feedback,
-    score,
-  } = req.body;
-*/
   const id = req.params.id;
   const array: PreferenceItem[] = [];
   let details!: OrderDetail[];
@@ -102,7 +92,7 @@ export const createOrder = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ message: 'Ocurrio un error al procesar el pago' });
-  }
+  }*/
 };
 
 export const receiveWebhook = async (req: Request, res: Response) => {

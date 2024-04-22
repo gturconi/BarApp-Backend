@@ -21,7 +21,8 @@ export const sendNotification = async (req: Request, res: Response) => {
 
   if (
     title == 'Solicitud de asistencia en mesa' ||
-    title == 'Solicitud de asistencia en mesa X'
+    title == 'Solicitud de asistencia en mesa X' ||
+    title == 'Pago realizado'
   ) {
     tokens = await searchEmployeeFcmTokens();
 
@@ -32,10 +33,8 @@ export const sendNotification = async (req: Request, res: Response) => {
       title = title.replace('X', '');
       body = body.replace('X', getTable(receivedToken));
     }
-
-    if (title == 'Estado del pedido actualizado') {
-      tokens = await searchCustomerFcmToken(userId);
-    }
+  } else if (title == 'Estado del pedido actualizado') {
+    tokens = await searchCustomerFcmToken(userId);
   }
 
   const message = {
