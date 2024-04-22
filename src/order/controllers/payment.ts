@@ -21,7 +21,7 @@ export const createOrder = async (req: Request, res: Response) => {
     access_token: process.env.MERCADOPAGO_API_KEY as string,
   });
   const isMobileApp = req.headers['user-agent']?.includes('Mobile');
-
+  console.log(' isMobileApp: ', isMobileApp);
   const id = req.params.id;
   const array: PreferenceItem[] = [];
   let details!: OrderDetail[];
@@ -30,7 +30,7 @@ export const createOrder = async (req: Request, res: Response) => {
     orderConstants.SELECT_ORDER_BY_ID,
     [id]
   );
-
+  console.log(' orderFounded:', orderFounded);
   if (orderFounded.length <= 0) {
     return handleServerError({
       res,
@@ -91,7 +91,7 @@ export const createOrder = async (req: Request, res: Response) => {
         auto_return: 'approved',
         notification_url: `${process.env.BACK_HOST}/api/payment/webhook/${id}`,
       });
-
+    console.log('result: ', result.body.init_point);
     res.json(result.body.init_point);
   } catch (error) {
     return res
