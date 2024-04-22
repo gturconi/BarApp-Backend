@@ -13,10 +13,11 @@ import { EntityListResponse } from '../../shared/models/entity.list.response.mod
 const { getMessaging } = require('firebase-admin/messaging');
 
 export const sendNotification = async (req: Request, res: Response) => {
-  const { title, body, receivedToken } = req.body;
-  console.log(title, body, receivedToken);
-
   let tokens: string[] = [];
+  let title = req.body.title;
+  let body = req.body.body;
+  let receivedToken = req.body.receivedToken;
+
   if (
     title == 'Solicitud de asistencia en mesa' ||
     title == 'Solicitud de asistencia en mesa X'
@@ -24,11 +25,11 @@ export const sendNotification = async (req: Request, res: Response) => {
     tokens = await searchEmployeeFcmTokens();
 
     if (title == 'Solicitud de asistencia en mesa X') {
-      title.replace('X', '');
-      body.replace('X', getTable(receivedToken));
+      title = title.replace('X', '');
+      body = body.replace('X', getTable(receivedToken));
     }
   }
-  console.log(tokens);
+
   const message = {
     notification: {
       title: title,
