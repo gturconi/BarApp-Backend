@@ -34,13 +34,13 @@ export const sendNotification = async (req: Request, res: Response) => {
       title: title,
       body: body,
     },
-    token: tokens[0],
+    tokens: tokens,
     // token: receivedToken,
   };
   console.log('message: ', message);
   // Enviar la notificación utilizando el SDK de Firebase Admin
   getMessaging()
-    .send(message)
+    .sendMulticast(message)
     .then((response: any) => {
       console.log('Successfully sent message:', response);
 
