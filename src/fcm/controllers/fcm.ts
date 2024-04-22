@@ -17,6 +17,7 @@ export const sendNotification = async (req: Request, res: Response) => {
   let title = req.body.title;
   let body = req.body.body;
   let receivedToken = req.body.receivedToken;
+  let userId = req.body.userId;
 
   if (
     title == 'Solicitud de asistencia en mesa' ||
@@ -24,9 +25,16 @@ export const sendNotification = async (req: Request, res: Response) => {
   ) {
     tokens = await searchEmployeeFcmTokens();
 
-    if (title == 'Solicitud de asistencia en mesa X') {
+    if (
+      title == 'Solicitud de asistencia en mesa X' ||
+      title == 'Nuevo pedido'
+    ) {
       title = title.replace('X', '');
       body = body.replace('X', getTable(receivedToken));
+    }
+
+    if (title == 'Estado del pedido actualizado') {
+      tokens = await searchCustomerFcmToken(userId);
     }
   }
 
@@ -73,6 +81,14 @@ async function searchEmployeeFcmTokens() {
     QueryConstants.SELECT_EMPLOYEE_FCM_TOKEN
   );
 
+  return tokens.map((obj) => obj.fcm_token);
+}
+
+async function searchCustomerFcmToken(id: string) {
+  const [tokens] = await pool.query<DbQueryResult<any[]>>(
+    QueryConstants.SELECT_CUSTOMER_FCM_TOKEN,
+    [id]
+  );
   return tokens.map((obj) => obj.fcm_token);
 }
 
