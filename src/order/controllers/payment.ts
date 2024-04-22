@@ -20,8 +20,8 @@ export const createOrder = async (req: Request, res: Response) => {
   mercadopago.configure({
     access_token: process.env.MERCADOPAGO_API_KEY as string,
   });
-  console.log(' user-agent:', req.headers['user-agent']);
-  /*
+  const isMobileApp = req.headers['user-agent']?.includes('Mobile');
+
   const id = req.params.id;
   const array: PreferenceItem[] = [];
   let details!: OrderDetail[];
@@ -66,6 +66,11 @@ export const createOrder = async (req: Request, res: Response) => {
     [orderFounded[0].user.id]
   );
 
+  let redirectUrl = `${process.env.FRONT_HOST}/orders/my-orders`;
+  if (isMobileApp) {
+    redirectUrl = 'orders/my-orders';
+  }
+
   try {
     const result: PreferenceCreateResponse =
       await mercadopago.preferences.create({
@@ -79,9 +84,9 @@ export const createOrder = async (req: Request, res: Response) => {
         },
 
         back_urls: {
-          success: `${process.env.FRONT_HOST}/orders/my-orders`,
-          pending: `${process.env.FRONT_HOST}/orders/my-orders`,
-          failure: `${process.env.FRONT_HOST}/orders/my-orders`,
+          success: redirectUrl,
+          pending: redirectUrl,
+          failure: redirectUrl,
         },
         auto_return: 'approved',
         notification_url: `${process.env.BACK_HOST}/api/payment/webhook/${id}`,
@@ -92,7 +97,7 @@ export const createOrder = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ message: 'Ocurrio un error al procesar el pago' });
-  }*/
+  }
 };
 
 export const receiveWebhook = async (req: Request, res: Response) => {
