@@ -31,3 +31,6 @@ export const SELECT_FCM_TOKEN =
 
 export const SELECT_EMPLOYEE_FCM_TOKEN =
   'SELECT us.fcm_token FROM users AS us INNER JOIN roles AS rol ON us.rol_id = rol.id WHERE rol.name LIKE "employee" AND us.baja = 0 AND us.fcm_token IS NOT NULL';
+
+export const SELECT_CUSTOMER_FCM_TOKEN =
+  'SELECT us.fcm_token FROM users AS us INNER JOIN roles AS rol ON us.rol_id = rol.id WHERE rol.name LIKE "customer" AND us.baja = 0 AND us.fcm_token IS NOT NULL AND us.id = ?';
