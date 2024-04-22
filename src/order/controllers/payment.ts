@@ -106,7 +106,7 @@ export const receiveWebhook = async (req: Request, res: Response) => {
     const payment: any = req.query;
     const { id } = req.params;
     let connection = null;
-
+    console.log('payment: ', payment);
     if (payment && typeof payment === 'object' && payment.type === 'payment') {
       const data: any = await mercadopago.payment.findById(
         payment['data.id'] as number
