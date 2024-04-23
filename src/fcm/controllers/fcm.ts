@@ -7,6 +7,7 @@ import pool from '../../shared/db/conn';
 
 import { handleServerError } from '../../shared/errorHandler';
 import * as QueryConstants from '../../user/controllers/queryConstants';
+import * as OrderConstants from '../../order/controllers/queryConstants';
 
 import { EntityListResponse } from '../../shared/models/entity.list.response.model';
 
@@ -99,3 +100,43 @@ function getTable(token: string) {
     return decodedToken.number;
   }
 }
+
+export const notifyOrderPaided = async (orderId: string) => {
+  let tokens: string[] = [];
+
+  const [orderFounded] = await pool.query<DbQueryResult<any[]>>(
+    OrderConstants.SELECT_ORDER_BY_ID,
+    [orderId]
+  );
+
+  tokens = await searchEmployeeFcmTokens();
+
+  const message = {
+    notification: {
+      title: 'Pago realizado',
+      body: `Un pedido de la mesa ${orderFounded[0]?.table_order.number} ha sido pagado`,
+    },
+    tokens: tokens,
+  };
+
+  getMessaging()
+    .sendMulticast(message)
+    .then((response: any) => {
+      console.log('Successfully sent message:', response);
+
+      if (response.failureCount > 0) {
+        const failedTokens: string[] = [];
+        response.responses.forEach((resp: any, idx: number) => {
+          if (!resp.success) {
+            failedTokens.push(tokens[idx]);
+          }
+        });
+        console.log('List of tokens that caused failures: ' + failedTokens);
+      }
+      return;
+    })
+    .catch((error: any) => {
+      console.log('Error sending message:', error);
+      return error;
+    });
+};

@@ -15,6 +15,7 @@ import { getUser } from '../../user/controllers/user';
 import * as userConstants from '../../user/controllers/queryConstants';
 import * as orderConstants from './queryConstants';
 import { PaymentGetResponse } from 'mercadopago/resources/payment';
+import { notifyOrderPaided } from '../../fcm/controllers/fcm';
 
 export const createOrder = async (req: Request, res: Response) => {
   mercadopago.configure({
@@ -136,6 +137,8 @@ export const receiveWebhook = async (req: Request, res: Response) => {
         ]);
 
         await connection.commit();
+
+        notifyOrderPaided(id);
       } catch (error) {
         return handleServerError({
           res,
