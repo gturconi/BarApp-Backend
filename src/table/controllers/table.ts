@@ -179,7 +179,7 @@ export const updateState = async (req: Request, res: Response) => {
       id,
     ]);
 
-    return res.status(200);
+    return res.status(200).json({ message: 'Mesa actualizada' });
   } catch (error) {
     return handleServerError({
       res,
