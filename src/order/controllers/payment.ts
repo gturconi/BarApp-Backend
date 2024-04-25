@@ -1,28 +1,28 @@
-import { Request, Response } from "express";
-import { DbQueryResult } from "../../shared/queryTypes";
-import { handleServerError } from "../../shared/errorHandler";
-import pool from "../../shared/db/conn";
+import { Request, Response } from 'express';
+import { DbQueryResult } from '../../shared/queryTypes';
+import { handleServerError } from '../../shared/errorHandler';
+import pool from '../../shared/db/conn';
 
-import mercadopago from "mercadopago";
-import { PreferenceItem } from "mercadopago/models/preferences/create-payload.model";
-import { PreferenceCreateResponse } from "mercadopago/resources/preferences";
+import mercadopago from 'mercadopago';
+import { PreferenceItem } from 'mercadopago/models/preferences/create-payload.model';
+import { PreferenceCreateResponse } from 'mercadopago/resources/preferences';
 
-import { OrderDetail } from "../models/orderDetail";
-import { User } from "../../user/models/user";
-import { OrderState } from "../models/order";
+import { OrderDetail } from '../models/orderDetail';
+import { User } from '../../user/models/user';
+import { OrderState } from '../models/order';
 
-import { getUser } from "../../user/controllers/user";
-import * as userConstants from "../../user/controllers/queryConstants";
-import * as orderConstants from "./queryConstants";
-import { PaymentGetResponse } from "mercadopago/resources/payment";
-import { notifyOrderPaided } from "../../fcm/controllers/fcm";
+import { getUser } from '../../user/controllers/user';
+import * as userConstants from '../../user/controllers/queryConstants';
+import * as orderConstants from './queryConstants';
+import { PaymentGetResponse } from 'mercadopago/resources/payment';
+import { notifyOrderPaided } from '../../fcm/controllers/fcm';
 
 export const createOrder = async (req: Request, res: Response) => {
   mercadopago.configure({
     access_token: process.env.MERCADOPAGO_API_KEY as string,
   });
-  const isMobileApp = req.headers["user-agent"]?.includes("Mobile");
-  console.log(" isMobileApp: ", isMobileApp);
+  const isMobileApp = req.headers['user-agent']?.includes('Mobile');
+  console.log(' isMobileApp: ', isMobileApp);
   const id = req.params.id;
   const array: PreferenceItem[] = [];
   let details!: OrderDetail[];
@@ -31,19 +31,19 @@ export const createOrder = async (req: Request, res: Response) => {
     orderConstants.SELECT_ORDER_BY_ID,
     [id]
   );
-  console.log(" orderFounded:", orderFounded);
+  console.log(' orderFounded:', orderFounded);
   if (orderFounded.length <= 0) {
     return handleServerError({
       res,
-      message: "Pedido no encontrado",
+      message: 'Pedido no encontrado',
       errorNumber: 404,
     });
   }
 
-  if (orderFounded[0].state.description != "Entregado") {
+  if (orderFounded[0].state.description != 'Entregado') {
     return handleServerError({
       res,
-      message: "Solo es posible pagar un pedido en estado Entregado",
+      message: 'Solo es posible pagar un pedido en estado Entregado',
       errorNumber: 400,
     });
   }
@@ -56,10 +56,10 @@ export const createOrder = async (req: Request, res: Response) => {
         ? detail.productId.toString()
         : detail.promotionId?.toString(),
       unit_price: detail.unitPrice,
-      currency_id: "ARS",
+      currency_id: 'ARS',
       quantity: detail.quantity,
-      title: "Pedido Nro: " + detail.orderId,
-      description: detail.comments ? detail.comments : "",
+      title: 'Pedido Nro: ' + detail.orderId,
+      description: detail.comments ? detail.comments : '',
     });
   });
 
@@ -90,15 +90,15 @@ export const createOrder = async (req: Request, res: Response) => {
           pending: redirectUrl,
           failure: redirectUrl,
         },
-        auto_return: "approved",
+        auto_return: 'approved',
         notification_url: `${process.env.BACK_HOST}/api/payment/webhook/${id}`,
       });
-    console.log("result: ", result.body.init_point);
+    console.log('result: ', result.body.init_point);
     res.json(result.body.init_point);
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Ocurrio un error al procesar el pago" });
+      .json({ message: 'Ocurrio un error al procesar el pago' });
   }
 };
 
@@ -107,10 +107,10 @@ export const receiveWebhook = async (req: Request, res: Response) => {
     const payment: any = req.query;
     const { id } = req.params;
     let connection = null;
-    console.log("payment: ", payment);
-    if (payment && typeof payment === "object" && payment.type === "payment") {
+    console.log('payment: ', payment);
+    if (payment && typeof payment === 'object' && payment.type === 'payment') {
       const data: any = await mercadopago.payment.findById(
-        payment["data.id"] as number
+        payment['data.id'] as number
       );
 
       try {
@@ -142,7 +142,7 @@ export const receiveWebhook = async (req: Request, res: Response) => {
       } catch (error) {
         return handleServerError({
           res,
-          message: "Ocurrio un error al procesar el pago",
+          message: 'Ocurrio un error al procesar el pago',
           errorNumber: 500,
           error,
         });
@@ -153,7 +153,7 @@ export const receiveWebhook = async (req: Request, res: Response) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Ocurrio un error al procesar el pago" });
+      .json({ message: 'Ocurrio un error al procesar el pago' });
   }
 };
 
@@ -171,14 +171,14 @@ export const createOrderCash = async (req: Request, res: Response) => {
       if (orderFounded.length <= 0) {
         return handleServerError({
           res,
-          message: "Pedido no encontrado",
+          message: 'Pedido no encontrado',
           errorNumber: 404,
         });
       }
-      if (orderFounded[0].state.description != "Entregado") {
+      if (orderFounded[0].state.description != 'Entregado') {
         return handleServerError({
           res,
-          message: "Solo es posible pagar un pedido en estado Entregado",
+          message: 'Solo es posible pagar un pedido en estado Entregado',
           errorNumber: 400,
         });
       }
@@ -188,21 +188,21 @@ export const createOrderCash = async (req: Request, res: Response) => {
       );
       const currentDate = new Date();
       const argentinaDate = new Date(
-        currentDate.toLocaleString("en-US", {
-          timeZone: "America/Argentina/Buenos_Aires",
+        currentDate.toLocaleString('en-US', {
+          timeZone: 'America/Argentina/Buenos_Aires',
         })
       );
       const formattedDate = argentinaDate
         .toISOString()
         .slice(0, 19)
-        .replace("T", " ");
+        .replace('T', ' ');
 
       const ticketData = {
         orderId: id,
         date_created: formattedDate,
         payer_email: orderFounded[0].user.email,
-        payment_method_id: "Efectivo",
-        status: "Pagado",
+        payment_method_id: 'cash_payment',
+        status: 'approved',
         total_paid_amount: orderFounded[0].total,
       };
       await pool.query<DbQueryResult<any[]>>(orderConstants.SAVE_TICKET, [
@@ -218,7 +218,7 @@ export const createOrderCash = async (req: Request, res: Response) => {
     } catch (error) {
       return handleServerError({
         res,
-        message: "Ocurrio un error al procesar el pago",
+        message: 'Ocurrio un error al procesar el pago',
         errorNumber: 500,
         error,
       });
@@ -226,6 +226,6 @@ export const createOrderCash = async (req: Request, res: Response) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Ocurrio un error al procesar el pago" });
+      .json({ message: 'Ocurrio un error al procesar el pago' });
   }
 };
