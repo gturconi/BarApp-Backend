@@ -165,7 +165,7 @@ export const createOrderCash = async (req: Request, res: Response) => {
       connection = await pool.getConnection();
       await connection.beginTransaction();
       const [orderFounded] = await pool.query<DbQueryResult<any[]>>(
-        orderConstants.SELECT_ORDER_BY_ID_2,
+        orderConstants.SELECT_ORDER_BY_ID,
         [id]
       );
       if (orderFounded.length <= 0) {
