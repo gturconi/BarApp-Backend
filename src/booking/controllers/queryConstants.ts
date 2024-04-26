@@ -30,3 +30,6 @@ export const INSERT_BOOKING =
 
 export const CHECK_EXISTING_BOOKING =
   'SELECT * FROM bookings b INNER JOIN bookingState bs ON bs.id = b.stateId WHERE b.userId = ? AND bs.description = "Pendiente"';
+
+export const GET_FUTURE_BOOKINGS =
+  'SELECT * FROM bookings WHERE date_hour > DATE(CONVERT_TZ(NOW(), "+00:00", "-03:00")) AND userId = ?';

@@ -148,3 +148,23 @@ export const insertBooking = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getFutureBookings = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const [bookings] = await pool.query<DbQueryResult<Booking[]>>(
+      QueryConstants.GET_FUTURE_BOOKINGS,
+      [id]
+    );
+
+    return res.status(200).json(bookings);
+  } catch (error) {
+    console.error(error);
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al obtener la lista de reservas',
+      errorNumber: 500,
+    });
+  }
+};
