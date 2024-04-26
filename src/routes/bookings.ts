@@ -5,12 +5,16 @@ import {
   insertBooking,
 } from '../booking/controllers/booking';
 import validatorBooking from '../booking/validators/booking';
-import { verifyToken } from '../middlewares/authJwt';
+import {
+  isAdminOrEmployee,
+  validateUserOrAdmin,
+  verifyToken,
+} from '../middlewares/authJwt';
 
 const router = express.Router();
 
-router.get('/', verifyToken, getBookings);
-router.get('/:id', verifyToken, getBooking);
+router.get('/', [verifyToken, isAdminOrEmployee], getBookings);
+router.get('/:id', [verifyToken, validateUserOrAdmin], getBooking);
 router.post('/', verifyToken, validatorBooking, insertBooking);
 
 export default router;

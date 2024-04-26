@@ -27,3 +27,6 @@ export const SELECT_BOOKING_STATE = 'SELECT * FROM bookingState WHERE id = ?';
 
 export const INSERT_BOOKING =
   'INSERT INTO bookings (date_hour, userId, stateId, quota, bookingDayId) VALUES (?, ?, ?, ?, ?)';
+
+export const CHECK_EXISTING_BOOKING =
+  'SELECT * FROM bookings b INNER JOIN bookingState bs ON bs.id = b.stateId WHERE b.userId = ? AND bs.description = "Pendiente"';

@@ -115,6 +115,20 @@ export const insertBooking = async (req: Request, res: Response) => {
       });
     }
 
+    const [checkExistingBooking] = await pool.query<DbQueryResult<Booking[]>>(
+      QueryConstants.CHECK_EXISTING_BOOKING,
+      [userId]
+    );
+
+    if (checkExistingBooking.length > 0) {
+      return handleServerError({
+        res,
+        message:
+          'No es posible registrar la reserva debido a que ya tiene una reserva pendiente',
+        errorNumber: 400,
+      });
+    }
+
     const [bookingInserted] = await pool.query<DbQueryInsert>(
       QueryConstants.INSERT_BOOKING,
       [date_hour, userId, BookingState.Pendiente, quota, bookingDay.id]
