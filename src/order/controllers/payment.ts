@@ -11,10 +11,10 @@ import { OrderDetail } from '../models/orderDetail';
 import { User } from '../../user/models/user';
 import { OrderState } from '../models/order';
 
-import { getUser } from '../../user/controllers/user';
 import * as userConstants from '../../user/controllers/queryConstants';
 import * as orderConstants from './queryConstants';
-import { PaymentGetResponse } from 'mercadopago/resources/payment';
+import * as tableConstants from '../../table/controllers/queryConstants';
+
 import { notifyOrderPaided } from '../../fcm/controllers/fcm';
 
 export const createOrder = async (req: Request, res: Response) => {
@@ -168,6 +168,7 @@ export const createOrderCash = async (req: Request, res: Response) => {
         orderConstants.SELECT_ORDER_BY_ID,
         [id]
       );
+
       if (orderFounded.length <= 0) {
         return handleServerError({
           res,
@@ -186,6 +187,13 @@ export const createOrderCash = async (req: Request, res: Response) => {
         orderConstants.UPDATE_ORDER_STATE,
         [OrderState.Pagado, id]
       );
+
+      await pool.query<DbQueryResult<any[]>>(tableConstants.UPDATE_TABLE, [
+        null,
+        1,
+        orderFounded[0].table_order.id,
+      ]);
+
       const currentDate = new Date();
       const argentinaDate = new Date(
         currentDate.toLocaleString('en-US', {
