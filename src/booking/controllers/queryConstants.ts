@@ -15,10 +15,15 @@ export const SEARCH_EXISTS_BOOKING_DAY =
   'SELECT * FROM bookingDays WHERE day_of_week = ? AND init_hour = ? AND end_hour = ?';
 
 export const SELECT_BOOKING_BY_ID =
-  'SELECT b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, JSON_OBJECT("id", b.tableId, "number", t.number) as table_booking, JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId  INNER JOIN tables t ON t.id = b.tableId  INNER JOIN bookingState bs ON bs.id = b.stateId WHERE id = ?';
+  'SELECT b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, quota, JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE b.id = ?';
 
 export const SELECT_BOOKINGS =
-  'SELECT b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, JSON_OBJECT("id", b.tableId, "number", t.number) as table_booking, JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId  INNER JOIN tables t ON t.id = b.tableId  INNER JOIN bookingState bs ON bs.id = b.stateId WHERE date_hour LIKE CONCAT("%", ?, "%") OR t.number = ? OR u.name LIKE CONCAT("%", ?, "%") OR bs.description LIKE CONCAT("%", ?, "%") ORDER BY date_hour DESC LIMIT ?, ?';
+  'SELECT b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, quota , JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE date_hour LIKE CONCAT("%", ?, "%") OR u.name LIKE CONCAT("%", ?, "%") OR bs.description LIKE CONCAT("%", ?, "%") ORDER BY date_hour DESC LIMIT ?, ?';
 
 export const COUNT_BOOKINGS =
-  'SELECT COUNT(*) FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN tables t ON t.id = b.tableId  INNER JOIN bookingState bs ON bs.id = b.stateId WHERE date_hour LIKE CONCAT("%", ?, "%") OR t.number = ? OR u.name LIKE CONCAT("%", ?, "%") OR bs.description LIKE CONCAT("%", ?, "%")';
+  'SELECT COUNT(*) FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE date_hour LIKE CONCAT("%", ?, "%") OR u.name LIKE CONCAT("%", ?, "%") OR bs.description LIKE CONCAT("%", ?, "%")';
+
+export const SELECT_BOOKING_STATE = 'SELECT * FROM bookingState WHERE id = ?';
+
+export const INSERT_BOOKING =
+  'INSERT INTO bookings (date_hour, userId, stateId, quota, bookingDayId) VALUES (?, ?, ?, ?, ?)';

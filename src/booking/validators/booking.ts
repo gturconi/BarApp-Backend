@@ -4,7 +4,7 @@ import { customErrorMap } from '../../shared/utils/customErrorMap';
 
 z.setErrorMap(customErrorMap);
 
-const validatorBookingDay: ((
+const validatorBooking: ((
   req: Request,
   res: Response,
   next: NextFunction
@@ -16,9 +16,8 @@ const validatorBookingDay: ((
           ? new Date(req.body.date_hour)
           : undefined,
         userId: req.body.userId,
-        tableId: req.body.tableId,
+        quota: req.body.quota,
         stateId: req.body.stateId,
-        bookingDayId: req.body.bookingDayId,
       };
 
       const isPutRequest = req.method === 'PUT';
@@ -40,12 +39,12 @@ const validatorBookingDay: ((
           message: 'El campo userId debe ser un número entero',
         });
 
-      const tableIdValidation = z
+      const quotaValidation = z
         .number({
-          invalid_type_error: 'El campo tableId debe ser un número',
+          invalid_type_error: 'El campo quota debe ser un número',
         })
         .int({
-          message: 'El campo tableId debe ser un número entero',
+          message: 'El campo quota debe ser un número entero',
         });
 
       const stateIdValidation = z
@@ -56,28 +55,13 @@ const validatorBookingDay: ((
           message: 'El campo stateId debe ser un número entero',
         });
 
-      const bookingDayIdValidation = z
-        .number({
-          invalid_type_error: 'El campo bookingDayId debe ser un número',
-        })
-        .int({
-          message: 'El campo bookingDayId debe ser un número entero',
-        });
-
       const schema = z.object({
         date_hour: isPutRequest
           ? date_hourValidation.optional()
           : date_hourValidation,
         userId: isPutRequest ? userIdValidation.optional() : userIdValidation,
-        tableId: isPutRequest
-          ? tableIdValidation.optional()
-          : tableIdValidation,
-        stateId: isPutRequest
-          ? stateIdValidation.optional()
-          : stateIdValidation,
-        bookingDayId: isPutRequest
-          ? bookingDayIdValidation.optional()
-          : bookingDayIdValidation,
+        quota: isPutRequest ? quotaValidation.optional() : quotaValidation,
+        stateId: stateIdValidation.optional(),
       });
 
       const validatedData = schema.safeParse(req.body);
@@ -95,4 +79,4 @@ const validatorBookingDay: ((
   },
 ];
 
-export default validatorBookingDay;
+export default validatorBooking;

@@ -8,20 +8,20 @@ export class Booking {
   public id?: number;
   public date_hour: Date;
   public userId: number;
-  public tableId: number;
+  public quota: number;
   public stateId: number;
   public bookingDayId: number;
 
   constructor(
     date_hour: Date,
     userId: number,
-    tableId: number,
+    quota: number,
     stateId: number,
     bookingDayId: number
   ) {
     this.date_hour = date_hour;
     this.userId = userId;
-    this.tableId = tableId;
+    this.quota = quota;
     this.stateId = stateId;
     this.bookingDayId = bookingDayId;
   }
