@@ -34,8 +34,14 @@ export const sendNotification = async (req: Request, res: Response) => {
       title = title.replace('X', '');
       body = body.replace('X', getTable(receivedToken));
     }
-  } else if (title == 'Estado del pedido actualizado') {
+  } else if (
+    title == 'Estado del pedido actualizado' ||
+    title == '¡Reserva Confirmada!' ||
+    title == 'Reserva Cancelada'
+  ) {
     tokens = await searchCustomerFcmToken(userId);
+  } else if (title == '¡Nueva Reserva Realizada!') {
+    tokens = await searchAdminFcmToken();
   }
 
   const message = {
@@ -88,6 +94,13 @@ async function searchCustomerFcmToken(id: string) {
   const [tokens] = await pool.query<DbQueryResult<any[]>>(
     QueryConstants.SELECT_CUSTOMER_FCM_TOKEN,
     [id]
+  );
+  return tokens.map((obj) => obj.fcm_token);
+}
+
+async function searchAdminFcmToken() {
+  const [tokens] = await pool.query<DbQueryResult<any[]>>(
+    QueryConstants.SELECT_ADMIN_FCM_TOKEN
   );
   return tokens.map((obj) => obj.fcm_token);
 }

@@ -168,3 +168,82 @@ export const getFutureBookings = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const cancelBooking = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const [bookingFounded] = await pool.query<DbQueryResult<any[]>>(
+      QueryConstants.SELECT_BOOKING_BY_ID,
+      [id]
+    );
+
+    if (bookingFounded.length <= 0) {
+      return handleServerError({
+        res,
+        message: 'Reserva no encontrada',
+        errorNumber: 404,
+      });
+    }
+    if (bookingFounded[0].state.id != BookingState.Pendiente) {
+      return handleServerError({
+        res,
+        message: 'Solo es posible cancelar reservas pendientes',
+        errorNumber: 400,
+      });
+    }
+
+    await pool.query<DbQueryInsert>(QueryConstants.UPDATE_BOOKING_STATE, [
+      BookingState.Cancelada,
+      id,
+    ]);
+
+    return res.status(200).send({ message: 'Reserva cancelada exitosamente' });
+  } catch (error) {
+    console.error(error);
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al actualizar reservas',
+      errorNumber: 500,
+    });
+  }
+};
+
+export const confirmBooking = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const [bookingFounded] = await pool.query<DbQueryResult<any[]>>(
+      QueryConstants.SELECT_BOOKING_BY_ID,
+      [id]
+    );
+
+    if (bookingFounded.length <= 0) {
+      return handleServerError({
+        res,
+        message: 'Reserva no encontrada',
+        errorNumber: 404,
+      });
+    }
+
+    if (bookingFounded[0].state.id != BookingState.Pendiente) {
+      return handleServerError({
+        res,
+        message: 'Solo es posible confirmar reservas pendientes',
+        errorNumber: 400,
+      });
+    }
+
+    await pool.query<DbQueryInsert>(QueryConstants.UPDATE_BOOKING_STATE, [
+      BookingState.Confirmada,
+      id,
+    ]);
+    return res.status(200).send({ message: 'Reserva confirmada exitosamente' });
+  } catch (error) {
+    console.error(error);
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al actualizar reservas',
+      errorNumber: 500,
+    });
+  }
+};
