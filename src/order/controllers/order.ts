@@ -1,20 +1,20 @@
-import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
-import { DbQueryInsert, DbQueryResult } from '../../shared/queryTypes';
-import pool from '../../shared/db/conn';
+import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
+import pool from "../../shared/db/conn";
 
-import * as OrderConstants from './queryConstants';
-import * as TableQueryConstants from '../../table/controllers/queryConstants';
-import * as UserQueryConstants from '../../user/controllers/queryConstants';
-import * as QrQueryConstants from '../../qr/controller/queryConstants';
+import * as OrderConstants from "./queryConstants";
+import * as TableQueryConstants from "../../table/controllers/queryConstants";
+import * as UserQueryConstants from "../../user/controllers/queryConstants";
+import * as QrQueryConstants from "../../qr/controller/queryConstants";
 
-import { handleServerError } from '../../shared/errorHandler';
+import { handleServerError } from "../../shared/errorHandler";
 
-import { EntityListResponse } from '../../shared/models/entity.list.response.model';
-import { Order } from '../models/order';
-import { ROLES } from '../../role/models/role';
+import { EntityListResponse } from "../../shared/models/entity.list.response.model";
+import { Order } from "../models/order";
+import { ROLES } from "../../role/models/role";
 
 import {
   checkExistingOrderState,
@@ -24,17 +24,17 @@ import {
   checkExistingUnconfirmedOrder,
   checkExistingUsers,
   checkTableState,
-} from '../../utils/checkOrder';
-import { OrderDetail } from '../models/orderDetail';
-import { User } from '../../user/models/user';
-import { Table } from '../../table/models/table';
+} from "../../utils/checkOrder";
+import { OrderDetail } from "../models/orderDetail";
+import { User } from "../../user/models/user";
+import { Table } from "../../table/models/table";
 
 dotenv.config();
 
 export const getOrders = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
 
-  const search = (req.query.search as string) || '';
+  const search = (req.query.search as string) || "";
 
   try {
     const [totalRows] = await pool.query<DbQueryResult<any[]>>(
@@ -61,7 +61,7 @@ export const getOrders = async (req: Request, res: Response) => {
     console.log(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener la lista de Pedidos',
+      message: "Ocurrio un error al obtener la lista de Pedidos",
       errorNumber: 500,
     });
   }
@@ -78,7 +78,7 @@ export const getOrder = async (req: Request, res: Response) => {
     if (rows.length <= 0) {
       return handleServerError({
         res,
-        message: 'Pedido no encontrado',
+        message: "Pedido no encontrado",
         errorNumber: 404,
       });
     }
@@ -87,7 +87,7 @@ export const getOrder = async (req: Request, res: Response) => {
   } catch (error) {
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener el pedido',
+      message: "Ocurrio un error al obtener el pedido",
       errorNumber: 500,
     });
   }
@@ -107,7 +107,7 @@ export const getUserOrders = async (req: Request, res: Response) => {
     if (userFounded.length <= 0) {
       return handleServerError({
         res,
-        message: 'Usuario no encontrado',
+        message: "Usuario no encontrado",
         errorNumber: 404,
       });
     }
@@ -136,7 +136,7 @@ export const getUserOrders = async (req: Request, res: Response) => {
     console.log(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener la lista de Pedidos',
+      message: "Ocurrio un error al obtener la lista de Pedidos",
       errorNumber: 500,
     });
   }
@@ -147,7 +147,7 @@ export const createOrder = async (req: Request, res: Response) => {
   try {
     const { tableNumber, userId, total, orderDetails } = req.body;
 
-    const secret = process.env.SECRET || '';
+    const secret = process.env.SECRET || "";
 
     const [qrs] = await pool.query<DbQueryResult<any[]>>(
       QrQueryConstants.SELECT_QRS
@@ -156,7 +156,7 @@ export const createOrder = async (req: Request, res: Response) => {
     if (qrs.length <= 0) {
       return handleServerError({
         res,
-        message: 'No se encontraron codigos para el pedido',
+        message: "No se encontraron codigos para el pedido",
         errorNumber: 404,
       });
     }
@@ -166,7 +166,7 @@ export const createOrder = async (req: Request, res: Response) => {
     if (!tokenFound) {
       return handleServerError({
         res,
-        message: 'El codigo escaneado es invalido',
+        message: "El codigo escaneado es invalido",
         errorNumber: 400,
       });
     }
@@ -174,7 +174,7 @@ export const createOrder = async (req: Request, res: Response) => {
     const decodedToken = jwt.verify(tableNumber, secret);
 
     let tableIdDecoded = 0;
-    if (typeof decodedToken === 'object' && 'number' in decodedToken) {
+    if (typeof decodedToken === "object" && "number" in decodedToken) {
       tableIdDecoded = decodedToken.number;
     }
 
@@ -231,7 +231,7 @@ export const createOrder = async (req: Request, res: Response) => {
     if (await checkExistingUnconfirmedOrder(userId)) {
       return handleServerError({
         res,
-        message: 'El cliente ya tiene un pedido pendiente',
+        message: "El cliente ya tiene un pedido pendiente",
         errorNumber: 400,
       });
     }
@@ -300,7 +300,7 @@ export const createOrder = async (req: Request, res: Response) => {
     if (connection) await connection.rollback();
     return handleServerError({
       res,
-      message: 'Ocurrio un error al crear el pedido',
+      message: "Ocurrio un error al crear el pedido",
       errorNumber: 500,
     });
   } finally {
@@ -321,7 +321,7 @@ export const deleteOrder = async (req: Request, res: Response) => {
     if (existingOrders.length == 0) {
       return handleServerError({
         res,
-        message: 'El pedido no existe',
+        message: "El pedido no existe",
         errorNumber: 400,
       });
     }
@@ -329,7 +329,7 @@ export const deleteOrder = async (req: Request, res: Response) => {
     if (existingOrders[0].state.id != 1) {
       return handleServerError({
         res,
-        message: 'No es posible eliminar un pedido ya confirmado',
+        message: "No es posible eliminar un pedido ya confirmado",
         errorNumber: 400,
       });
     }
@@ -359,12 +359,12 @@ export const deleteOrder = async (req: Request, res: Response) => {
     }
 
     await connection.commit();
-    return res.status(200).json({ message: 'Pedido eliminado exitosamente' });
+    return res.status(200).json({ message: "Pedido eliminado exitosamente" });
   } catch (error) {
     if (connection) await connection.rollback();
     return handleServerError({
       res,
-      message: 'Ocurrio un error al eliminar el pedido',
+      message: "Ocurrio un error al eliminar el pedido",
       errorNumber: 500,
       error,
     });
@@ -382,7 +382,7 @@ export const updateOrderState = async (req: Request, res: Response) => {
     if (!(await checkExistingOrderState(idState))) {
       return handleServerError({
         res,
-        message: 'El estado del pedido no existe',
+        message: "El estado del pedido no existe",
         errorNumber: 400,
       });
     }
@@ -395,15 +395,15 @@ export const updateOrderState = async (req: Request, res: Response) => {
     if (orderFounded.length <= 0) {
       return handleServerError({
         res,
-        message: 'Pedido no encontrado',
+        message: "Pedido no encontrado",
         errorNumber: 404,
       });
     }
 
-    if (orderFounded[0].state.description == 'Pagado') {
+    if (orderFounded[0].state.description == "Pagado") {
       return handleServerError({
         res,
-        message: 'No es posible cambiar el estado de un pedido ya pagado',
+        message: "No es posible cambiar el estado de un pedido ya pagado",
         errorNumber: 400,
       });
     }
@@ -413,11 +413,11 @@ export const updateOrderState = async (req: Request, res: Response) => {
       id,
     ]);
 
-    return res.status(200).json({ message: 'Estado del pedido actualizado' });
+    return res.status(200).json({ message: "Estado del pedido actualizado" });
   } catch (error) {
     return handleServerError({
       res,
-      message: 'Ocurrio un error al eliminar el pedido',
+      message: "Ocurrio un error al eliminar el pedido",
       errorNumber: 500,
       error,
     });
@@ -458,7 +458,7 @@ export const getLastOrderFromTable = async (req: Request, res: Response) => {
   } catch (error) {
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener el pedido',
+      message: "Ocurrio un error al obtener el pedido",
       errorNumber: 500,
       error,
     });
@@ -470,7 +470,7 @@ export const checkQR = async (req: Request, res: Response) => {
     const { code } = req.body;
     console.log(code);
 
-    const secret = process.env.SECRET || '';
+    const secret = process.env.SECRET || "";
 
     const [qrs] = await pool.query<DbQueryResult<any[]>>(
       QrQueryConstants.SELECT_QRS
@@ -479,7 +479,7 @@ export const checkQR = async (req: Request, res: Response) => {
     if (qrs.length <= 0) {
       return handleServerError({
         res,
-        message: 'No se encontraron codigos para el pedido',
+        message: "No se encontraron codigos para el pedido",
         errorNumber: 404,
       });
     }
@@ -489,18 +489,55 @@ export const checkQR = async (req: Request, res: Response) => {
     if (!tokenFound) {
       return handleServerError({
         res,
-        message: 'El codigo escaneado es invalido',
+        message: "El codigo escaneado es invalido",
         errorNumber: 400,
       });
     }
 
-    return res.status(200).json({ message: 'Codigo validado' });
+    return res.status(200).json({ message: "Codigo validado" });
   } catch (error) {
     console.log(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al validar el código',
+      message: "Ocurrio un error al validar el código",
       errorNumber: 500,
+    });
+  }
+};
+
+export const updateOrderQuiz = async (req: Request, res: Response) => {
+  let connection = null;
+  try {
+    const { id } = req.params;
+    const { feedback, score } = req.body;
+
+    const [orderFounded] = await pool.query<DbQueryResult<any[]>>(
+      OrderConstants.SELECT_ORDER_BY_ID,
+      [id]
+    );
+
+    if (orderFounded.length <= 0) {
+      return handleServerError({
+        res,
+        message: "Pedido no encontrado",
+        errorNumber: 404,
+      });
+    }
+
+    await pool.query<DbQueryResult<any[]>>(
+      OrderConstants.UPDATE_ORDER_FEEDBACK,
+      [feedback, score, id]
+    );
+
+    return res
+      .status(200)
+      .json({ message: "Puntaje y calificacion del pedido actualizado" });
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: "Ocurrio un error al cargar el puntaje y calificacion",
+      errorNumber: 500,
+      error,
     });
   }
 };
