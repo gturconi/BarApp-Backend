@@ -20,9 +20,7 @@ export const getMostSelledProdcuts = async (req: Request, res: Response) => {
         message: 'No se encontraron productos vendidos',
       });
     }
-    return res.status(200).json({
-      results: metric,
-    });
+    return res.status(200).json(metric);
   } catch (error) {
     return handleServerError({
       res,
