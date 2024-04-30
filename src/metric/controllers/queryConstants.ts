@@ -3,3 +3,6 @@ export const MOST_SELLED_PRODUCTS =
 
 export const TOP_FIVE_CUSTOMERS =
   'SELECT u.name, COUNT(*) as cant FROM users u LEFT JOIN orders o ON u.id = o.userId AND o.idState = 4 WHERE u.baja=0 GROUP BY u.name ORDER BY cant DESC LIMIT 5';
+
+export const WEEKLY_SALES_HISTORY =
+  'SELECT WEEK(date_created) as week, COUNT(*) as cant FROM orders GROUP BY week';
