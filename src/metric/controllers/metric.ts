@@ -33,6 +33,27 @@ export const getMostSelledProdcuts = async (req: Request, res: Response) => {
   }
 };
 
+export const getLessSelledProdcuts = async (req: Request, res: Response) => {
+  try {
+    const [metric] = await pool.query<DbQueryResult<ProductSelled[]>>(
+      queryConstants.LESS_SELLED_PRODUCTS
+    );
+
+    if (metric.length <= 0) {
+      return res.status(404).json({
+        message: 'No se encontraron productos vendidos',
+      });
+    }
+    return res.status(200).json(metric);
+  } catch (error) {
+    return handleServerError({
+      res,
+      message: 'Ocurrio un error al obtener la metrica',
+      errorNumber: 500,
+    });
+  }
+};
+
 export const topFiveCustomers = async (req: Request, res: Response) => {
   try {
     const [metric] = await pool.query<DbQueryResult<TopCustomers[]>>(
