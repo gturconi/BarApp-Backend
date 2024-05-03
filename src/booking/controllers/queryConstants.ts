@@ -15,10 +15,10 @@ export const SEARCH_EXISTS_BOOKING_DAY =
   'SELECT * FROM bookingDays WHERE day_of_week = ? AND init_hour = ? AND end_hour = ?';
 
 export const SELECT_BOOKING_BY_ID =
-  'SELECT id, b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, quota, JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE b.id = ?';
+  'SELECT b.id, b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, quota, JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE b.id = ?';
 
 export const SELECT_BOOKINGS =
-  'SELECT id, b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, quota , JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE date_hour LIKE CONCAT("%", ?, "%") OR u.name LIKE CONCAT("%", ?, "%") OR bs.description LIKE CONCAT("%", ?, "%") ORDER BY date_hour DESC LIMIT ?, ?';
+  'SELECT b.id, b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, quota , JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE date_hour LIKE CONCAT("%", ?, "%") OR u.name LIKE CONCAT("%", ?, "%") OR bs.description LIKE CONCAT("%", ?, "%") ORDER BY date_hour DESC LIMIT ?, ?';
 
 export const COUNT_BOOKINGS =
   'SELECT COUNT(*) as total FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE date_hour LIKE CONCAT("%", ?, "%") OR u.name LIKE CONCAT("%", ?, "%") OR bs.description LIKE CONCAT("%", ?, "%")';
