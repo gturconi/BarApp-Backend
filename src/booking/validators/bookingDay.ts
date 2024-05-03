@@ -12,7 +12,9 @@ const validatorBookingDay: ((
   (req, res, next) => {
     try {
       req.body = {
-        day_of_week: req.body.day_of_week,
+        day_of_week: req.body.day_of_week
+          ? parseInt(req.body.day_of_week)
+          : undefined,
         init_hour: req.body.init_hour,
         end_hour: req.body.end_hour,
       };
