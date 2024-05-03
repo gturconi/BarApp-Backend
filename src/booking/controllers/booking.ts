@@ -1,22 +1,20 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 
-import { DbQueryInsert, DbQueryResult } from '../../shared/queryTypes';
-import pool from '../../shared/db/conn';
+import { DbQueryInsert, DbQueryResult } from "../../shared/queryTypes";
+import pool from "../../shared/db/conn";
 
-import { Booking, BookingDay, BookingState } from '../models/booking';
-import * as QueryConstants from '../controllers/queryConstants';
-import * as UserConstants from '../../user/controllers/queryConstants';
-import * as TableConstants from '../../table/controllers/queryConstants';
+import { Booking, BookingDay, BookingState } from "../models/booking";
+import * as QueryConstants from "../controllers/queryConstants";
+import * as UserConstants from "../../user/controllers/queryConstants";
 
-import { handleServerError } from '../../shared/errorHandler';
-import { EntityListResponse } from '../../shared/models/entity.list.response.model';
-import { User } from '../../user/models/user';
-import { Table } from '../../table/models/table';
+import { handleServerError } from "../../shared/errorHandler";
+import { EntityListResponse } from "../../shared/models/entity.list.response.model";
+import { User } from "../../user/models/user";
 
 export const getBookings = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
 
-  const search = (req.query.search as string) || '';
+  const search = (req.query.search as string) || "";
 
   try {
     const [totalRows] = await pool.query<DbQueryResult<any[]>>(
@@ -44,7 +42,7 @@ export const getBookings = async (req: Request, res: Response) => {
     console.error(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener la lista de reservas',
+      message: "Ocurrio un error al obtener la lista de reservas",
       errorNumber: 500,
     });
   }
@@ -59,14 +57,14 @@ export const getBooking = async (req: Request, res: Response) => {
       [id]
     );
     if (booking.length <= 0) {
-      return res.status(404).json({ message: 'Reserva no encontrada' });
+      return res.status(404).json({ message: "Reserva no encontrada" });
     }
     return res.json(booking[0]);
   } catch (error) {
     console.error(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener la reserva',
+      message: "Ocurrio un error al obtener la reserva",
       errorNumber: 500,
     });
   }
@@ -75,7 +73,8 @@ export const getBooking = async (req: Request, res: Response) => {
 export const insertBooking = async (req: Request, res: Response) => {
   try {
     const { date_hour, userId, quota } = req.body;
-
+    const date = date_hour;
+    date.setHours(date.getHours() - 3);
     const [existingUser] = await pool.query<DbQueryResult<User[]>>(
       UserConstants.SELECT_USER_BY_ID,
       [userId]
@@ -84,33 +83,23 @@ export const insertBooking = async (req: Request, res: Response) => {
     if (existingUser.length <= 0) {
       return handleServerError({
         res,
-        message: 'El usuario no existe',
+        message: "El usuario no existe",
         errorNumber: 400,
       });
     }
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const seconds = date.getSeconds().toString().padStart(2, "0");
 
-    let bookingTime =
-      date_hour.getHours() +
-      ':' +
-      date_hour.getMinutes() +
-      ':' +
-      date_hour.getSeconds();
-
+    let bookingTime = `${hours}:${minutes}:${seconds}`;
     const [bookingDays] = await pool.query<DbQueryResult<BookingDay[]>>(
-      QueryConstants.SELECT_BOOKING_DAYS
+      QueryConstants.SELECT_AVAILABLE_BOOKING_DAY,
+      [date.getDay(), bookingTime, bookingTime]
     );
-    let bookingDay = bookingDays.find((bookingDay) => {
-      return (
-        bookingDay.day_of_week == date_hour.getDay() &&
-        bookingDay.init_hour <= bookingTime &&
-        bookingDay.end_hour >= bookingTime
-      );
-    });
-
-    if (!bookingDay) {
+    if (!bookingDays.length) {
       return handleServerError({
         res,
-        message: 'La fecha y hora de la reserva no se encuentra disponible',
+        message: "La fecha y hora de la reserva no se encuentra disponible",
         errorNumber: 400,
       });
     }
@@ -124,14 +113,14 @@ export const insertBooking = async (req: Request, res: Response) => {
       return handleServerError({
         res,
         message:
-          'No es posible registrar la reserva debido a que ya tiene una reserva pendiente',
+          "No es posible registrar la reserva debido a que ya tiene una reserva pendiente",
         errorNumber: 400,
       });
     }
 
     const [bookingInserted] = await pool.query<DbQueryInsert>(
       QueryConstants.INSERT_BOOKING,
-      [date_hour, userId, BookingState.Pendiente, quota, bookingDay.id]
+      [date, userId, BookingState.Pendiente, quota, bookingDays[0].id]
     );
 
     const [newBooking] = await pool.query<DbQueryResult<Booking[]>>(
@@ -141,9 +130,10 @@ export const insertBooking = async (req: Request, res: Response) => {
 
     res.status(201).send({ booking: newBooking[0] });
   } catch (error) {
+    console.error(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al crear la reserva',
+      message: "Ocurrio un error al crear la reserva",
       errorNumber: 500,
     });
   }
@@ -163,7 +153,7 @@ export const getFutureBookings = async (req: Request, res: Response) => {
     console.error(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al obtener la lista de reservas',
+      message: "Ocurrio un error al obtener la lista de reservas",
       errorNumber: 500,
     });
   }
@@ -180,14 +170,14 @@ export const cancelBooking = async (req: Request, res: Response) => {
     if (bookingFounded.length <= 0) {
       return handleServerError({
         res,
-        message: 'Reserva no encontrada',
+        message: "Reserva no encontrada",
         errorNumber: 404,
       });
     }
     if (bookingFounded[0].state.id != BookingState.Pendiente) {
       return handleServerError({
         res,
-        message: 'Solo es posible cancelar reservas pendientes',
+        message: "Solo es posible cancelar reservas pendientes",
         errorNumber: 400,
       });
     }
@@ -197,12 +187,12 @@ export const cancelBooking = async (req: Request, res: Response) => {
       id,
     ]);
 
-    return res.status(200).send({ message: 'Reserva cancelada exitosamente' });
+    return res.status(200).send({ message: "Reserva cancelada exitosamente" });
   } catch (error) {
     console.error(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al actualizar reservas',
+      message: "Ocurrio un error al actualizar reservas",
       errorNumber: 500,
     });
   }
@@ -220,7 +210,7 @@ export const confirmBooking = async (req: Request, res: Response) => {
     if (bookingFounded.length <= 0) {
       return handleServerError({
         res,
-        message: 'Reserva no encontrada',
+        message: "Reserva no encontrada",
         errorNumber: 404,
       });
     }
@@ -228,7 +218,7 @@ export const confirmBooking = async (req: Request, res: Response) => {
     if (bookingFounded[0].state.id != BookingState.Pendiente) {
       return handleServerError({
         res,
-        message: 'Solo es posible confirmar reservas pendientes',
+        message: "Solo es posible confirmar reservas pendientes",
         errorNumber: 400,
       });
     }
@@ -237,12 +227,12 @@ export const confirmBooking = async (req: Request, res: Response) => {
       BookingState.Confirmada,
       id,
     ]);
-    return res.status(200).send({ message: 'Reserva confirmada exitosamente' });
+    return res.status(200).send({ message: "Reserva confirmada exitosamente" });
   } catch (error) {
     console.error(error);
     return handleServerError({
       res,
-      message: 'Ocurrio un error al actualizar reservas',
+      message: "Ocurrio un error al actualizar reservas",
       errorNumber: 500,
     });
   }
