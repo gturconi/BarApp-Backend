@@ -15,9 +15,9 @@ const validatorBooking: ((
         date_hour: req.body.date_hour
           ? new Date(req.body.date_hour)
           : undefined,
-        userId: req.body.userId,
+        userId: req.body.employeeId ? parseInt(req.body.userId) : undefined,
         quota: req.body.quota,
-        stateId: req.body.stateId,
+        stateId: req.body.employeeId ? parseInt(req.body.userId) : undefined,
       };
 
       const isPutRequest = req.method === 'PUT';
