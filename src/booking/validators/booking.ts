@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { Request, Response, NextFunction } from 'express';
 import { customErrorMap } from '../../shared/utils/customErrorMap';
+import * as moment from 'moment-timezone';
 
 z.setErrorMap(customErrorMap);
 
@@ -10,11 +11,12 @@ const validatorBooking: ((
   next: NextFunction
 ) => void)[] = [
   (req, res, next) => {
+    const dateString = req.body.date_hour || undefined;
+    const momentDate = moment.tz(dateString, 'YYYY-MM-DDTHH:mm:ssZ', 'America/Buenos_Aires');
+    const date = new Date(momentDate.format('YYYY-MM-DDTHH:mm:ssZ'));
     try {
       req.body = {
-        date_hour: req.body.date_hour
-          ? new Date(req.body.date_hour)
-          : undefined,
+        date_hour: date,
         userId: req.body.userId,
         quota: req.body.quota,
         stateId: req.body.stateId,
