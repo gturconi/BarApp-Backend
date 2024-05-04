@@ -152,6 +152,7 @@ export const receiveWebhook = async (req: Request, res: Response) => {
 
     res.sendStatus(204);
   } catch (error) {
+    console.log('payment error: ', error);
     return res
       .status(500)
       .json({ message: 'Ocurrio un error al procesar el pago' });
