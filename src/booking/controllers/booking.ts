@@ -75,7 +75,7 @@ export const getBooking = async (req: Request, res: Response) => {
 export const insertBooking = async (req: Request, res: Response) => {
   try {
     const { date_hour, userId, quota } = req.body;
-
+    console.log(date_hour);
     const [existingUser] = await pool.query<DbQueryResult<User[]>>(
       UserConstants.SELECT_USER_BY_ID,
       [userId]
@@ -90,15 +90,16 @@ export const insertBooking = async (req: Request, res: Response) => {
     }
 
     let bookingTime =
-      date_hour.getHours() +
+      date_hour.getHours().toString().padStart(2, '0') +
       ':' +
-      date_hour.getMinutes() +
+      date_hour.getMinutes().toString().padStart(2, '0') +
       ':' +
-      date_hour.getSeconds();
+      date_hour.getSeconds().toString().padStart(2, '0');
 
     const [bookingDays] = await pool.query<DbQueryResult<BookingDay[]>>(
       QueryConstants.SELECT_BOOKING_DAYS
     );
+
     let bookingDay = bookingDays.find((bookingDay) => {
       return (
         bookingDay.day_of_week == date_hour.getDay() &&
@@ -141,6 +142,7 @@ export const insertBooking = async (req: Request, res: Response) => {
 
     res.status(201).send({ booking: newBooking[0] });
   } catch (error) {
+    console.error(error);
     return handleServerError({
       res,
       message: 'Ocurrio un error al crear la reserva',
