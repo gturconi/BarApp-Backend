@@ -20,6 +20,9 @@ export const sendNotification = async (req: Request, res: Response) => {
   let receivedToken = req.body.receivedToken;
   let userId = req.body.userId;
 
+  console.log('Notification title : ', title);
+  console.log('User id : ', userId);
+
   if (
     title == 'Solicitud de asistencia en mesa' ||
     title == 'Solicitud de asistencia en mesa X' ||
@@ -53,6 +56,7 @@ export const sendNotification = async (req: Request, res: Response) => {
     // token: receivedToken,
   };
   console.log('message: ', message);
+  console.log('token destiny: ', tokens);
   // Enviar la notificación utilizando el SDK de Firebase Admin
   getMessaging()
     .sendMulticast(message)

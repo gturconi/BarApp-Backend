@@ -140,6 +140,7 @@ export const receiveWebhook = async (req: Request, res: Response) => {
 
         notifyOrderPaided(id);
       } catch (error) {
+        console.log('payment error: ', error);
         return handleServerError({
           res,
           message: 'Ocurrio un error al procesar el pago',
