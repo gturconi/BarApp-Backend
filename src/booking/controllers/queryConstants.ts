@@ -18,7 +18,7 @@ export const SELECT_BOOKING_BY_ID =
   'SELECT b.id, b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, quota, JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE b.id = ?';
 
 export const SELECT_BOOKINGS =
-  'SELECT b.id, b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, quota , JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE date_hour LIKE CONCAT("%", ?, "%") OR u.name LIKE CONCAT("%", ?, "%") OR bs.description LIKE CONCAT("%", ?, "%") ORDER BY date_hour DESC LIMIT ?, ?';
+  'SELECT b.id, b.date_hour, JSON_OBJECT("id", b.userId, "name", u.name) as user, quota , JSON_OBJECT("id", b.stateId, "description", bs.description) as state, b.bookingDayId	 FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE date_hour LIKE CONCAT("%", ?, "%") OR u.name LIKE CONCAT("%", ?, "%") OR bs.description LIKE CONCAT("%", ?, "%") ORDER BY date_hour DESC, b.id DESC LIMIT ?, ?';
 
 export const COUNT_BOOKINGS =
   'SELECT COUNT(*) as total FROM bookings b INNER JOIN users u ON u.id = b.userId INNER JOIN bookingState bs ON bs.id = b.stateId WHERE date_hour LIKE CONCAT("%", ?, "%") OR u.name LIKE CONCAT("%", ?, "%") OR bs.description LIKE CONCAT("%", ?, "%")';
