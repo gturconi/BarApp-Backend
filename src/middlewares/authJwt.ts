@@ -10,6 +10,7 @@ import { DbQueryResult } from '../shared/queryTypes';
 import { UserRole } from '../types/userRol';
 import * as QueryConstants from '../user/controllers/queryConstants';
 import * as OrderConstants from '../order/controllers/queryConstants';
+import * as BookingConstants from '../booking/controllers/queryConstants';
 import { Order } from '../order/models/order';
 
 dotenv.config();
@@ -214,6 +215,58 @@ export const validateUserOrder = async (
         return res.status(404).json({ message: 'No se encontro el pedido' });
       }
       if (userIdFromToken == order[0].user.id.toString()) {
+        next();
+        return;
+      }
+    }
+
+    const userOrderId = req.body.userId;
+
+    if (userIdFromToken == userOrderId) {
+      next();
+      return;
+    }
+
+    return res.status(403).json({ message: 'No autorizado' });
+  } catch (error) {
+    return res.status(500).send({ message: 'Ocurrió un error' });
+  }
+};
+
+export const validateUserBooking = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userIdFromToken = req.userId;
+
+    if (!userIdFromToken) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+
+    const [rows] = await pool.query<DbQueryResult<UserRole[]>>(
+      QueryConstants.SELECT_USER_BY_ID,
+      [userIdFromToken]
+    );
+
+    if (rows && rows[0].role === 'admin') {
+      next();
+      return;
+    }
+
+    const requestedBookingId = req.params.id;
+
+    if (requestedBookingId != null) {
+      const [booking] = await pool.query<DbQueryResult<any[]>>(
+        BookingConstants.SELECT_BOOKING_BY_ID,
+        [requestedBookingId]
+      );
+
+      if (booking.length <= 0) {
+        return res.status(404).json({ message: 'No se encontro la reserva' });
+      }
+      if (userIdFromToken == booking[0].user.id.toString()) {
         next();
         return;
       }

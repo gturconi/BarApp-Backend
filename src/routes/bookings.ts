@@ -10,6 +10,7 @@ import {
 import validatorBooking from '../booking/validators/booking';
 import {
   isAdminOrEmployee,
+  validateUserBooking,
   validateUserOrAdmin,
   verifyToken,
 } from '../middlewares/authJwt';
@@ -20,7 +21,7 @@ router.get('/', [verifyToken, isAdminOrEmployee], getBookings);
 router.get('/:id', [verifyToken, validateUserOrAdmin], getBooking);
 router.get('/user/:id', verifyToken, getFutureBookings);
 router.post('/', verifyToken, validatorBooking, insertBooking);
-router.put('/cancel/:id', [verifyToken, validateUserOrAdmin], cancelBooking);
+router.put('/cancel/:id', [verifyToken, validateUserBooking], cancelBooking);
 router.put('/confirm/:id', [verifyToken, isAdminOrEmployee], confirmBooking);
 
 export default router;
