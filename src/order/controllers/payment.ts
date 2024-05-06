@@ -68,7 +68,7 @@ export const createOrder = async (req: Request, res: Response) => {
     [orderFounded[0].user.id]
   );
 
-  let redirectUrl = `${process.env.FRONT_HOST}/orders/my-orders/confirmed/details/${id}?success=true`;
+  let redirectUrl = `${process.env.FRONT_HOST}/orders/my-orders/confirmed`;
   /*if (isMobileApp) {
     redirectUrl = `orders/my-orders/confirmed/details/${id}?success=true`;
   }*/
