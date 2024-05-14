@@ -22,6 +22,9 @@ export const DELETE_ORDER_DETAIL = 'DELETE FROM orderDetail WHERE orderId = ?';
 
 export const UPDATE_ORDER_STATE = 'UPDATE orders SET idState = ? WHERE id = ?';
 
+export const UPDATE_ORDER_EMPLOYEE =
+  'UPDATE orders SET employeeId = ? WHERE id = ?';
+
 export const UPDATE_ORDER_FEEDBACK =
   'UPDATE orders SET feedback = ?, score = ? WHERE id = ?';
 
