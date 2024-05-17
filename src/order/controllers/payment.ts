@@ -59,7 +59,7 @@ export const createOrder = async (req: Request, res: Response) => {
       currency_id: 'ARS',
       quantity: detail.quantity,
       title: 'Pedido Nro: ' + detail.orderId,
-      description: detail.comments ? detail.comments : '',
+      description: 'Pedido Nro: ' + id,
     });
   });
 
