@@ -36,4 +36,4 @@ export const SELECT_CUSTOMER_FCM_TOKEN =
   'SELECT us.fcm_token FROM users AS us INNER JOIN roles AS rol ON us.rol_id = rol.id WHERE rol.name LIKE "customer" AND us.baja = 0 AND us.fcm_token IS NOT NULL AND us.id = ?';
 
 export const SELECT_ADMIN_FCM_TOKEN =
-  'SELECT us.fcm_token FROM users AS us INNER JOIN roles AS rol ON us.rol_id = rol.id WHERE rol.name LIKE "admin" AND us.baja = 0 AND us.fcm_token IS NOT NULL AND us.id = ?';
+  'SELECT us.fcm_token FROM users AS us INNER JOIN roles AS rol ON us.rol_id = rol.id WHERE rol.name LIKE "admin" AND us.baja = 0 AND us.fcm_token IS NOT NULL';
