@@ -61,11 +61,11 @@ export const checkExistingPromotions = async (orderDetail: OrderDetail) => {
   }
 };
 
-export const checkExistingTables = async (number: string) => {
+export const checkExistingTables = async (id: string) => {
   try {
     const [existingTables] = await pool.query<DbQueryResult<Table[]>>(
-      TableQueryConstants.SELECT_TABLE_BY_NUMBER,
-      [number]
+      TableQueryConstants.SELECT_TABLE_BY_ID,
+      [id]
     );
 
     return existingTables.length > 0 ? true : false;
