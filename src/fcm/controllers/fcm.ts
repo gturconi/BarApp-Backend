@@ -40,7 +40,8 @@ export const sendNotification = async (req: Request, res: Response) => {
   } else if (
     title == 'Estado del pedido actualizado' ||
     title == '¡Reserva Confirmada!' ||
-    title == 'Reserva Cancelada'
+    title == 'Reserva Cancelada' ||
+    title == 'Pedido pagado en efectivo/otro'
   ) {
     tokens = await searchCustomerFcmToken(userId);
   } else if (title == '¡Nueva Reserva Realizada!') {
