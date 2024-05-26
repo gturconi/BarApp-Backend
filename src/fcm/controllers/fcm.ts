@@ -26,7 +26,9 @@ export const sendNotification = async (req: Request, res: Response) => {
   if (
     title == 'Solicitud de asistencia en mesa' ||
     title == 'Solicitud de asistencia en mesa X' ||
-    title == 'Pago realizado'
+    title == 'Pago realizado' ||
+    title == 'Nuevo pedido' ||
+    title == 'Pedido cancelado'
   ) {
     tokens = await searchEmployeeFcmTokens();
 
