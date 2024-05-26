@@ -46,7 +46,10 @@ export const sendNotification = async (req: Request, res: Response) => {
     title == 'Pedido pagado en efectivo/otro'
   ) {
     tokens = await searchCustomerFcmToken(userId);
-  } else if (title == '¡Nueva Reserva Realizada!') {
+  } else if (
+    title == '¡Nueva Reserva Realizada!' ||
+    title == 'Cancelación de reserva'
+  ) {
     tokens = await searchAdminFcmToken();
   }
 
