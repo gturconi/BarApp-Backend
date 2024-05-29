@@ -11,19 +11,22 @@ export class Booking {
   public quota: number;
   public stateId: number;
   public bookingDayId: number;
+  public reason: string;
 
   constructor(
     date_hour: Date,
     userId: number,
     quota: number,
     stateId: number,
-    bookingDayId: number
+    bookingDayId: number,
+    reason: string
   ) {
     this.date_hour = date_hour;
     this.userId = userId;
     this.quota = quota;
     this.stateId = stateId;
     this.bookingDayId = bookingDayId;
+    this.reason = reason;
   }
 }
 
